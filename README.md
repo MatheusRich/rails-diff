@@ -31,13 +31,19 @@ $ gem install rails-diff
 Inside your Rails application directory, run:
 
 ```bash
-$ rails-diff diff FILE
+$ rails-diff diff FILE [FILE ...]
 ```
 
 For example, to compare your Dockerfile with the one from Rails:
 
 ```bash
 $ rails-diff diff Dockerfile
+```
+
+You can also compare multiple files at once:
+
+```bash
+$ rails-diff diff Dockerfile .gitignore config/application.rb
 ```
 
 Common files to compare:

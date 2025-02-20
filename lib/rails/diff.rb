@@ -14,26 +14,40 @@ module Rails
     RAILS_REPO = "https://github.com/rails/rails.git"
 
     class << self
-      def for(file)
+      def for(*files)
         Dir.mktmpdir do |dir|
           app_name = File.basename(Dir.pwd)
           generate_rails_app(dir, app_name)
-          rails_file = File.join(dir, app_name, file)
-          repo_file = File.join(Dir.pwd, file)
 
-          return "File #{file} not found in Rails template" unless File.exist?(rails_file)
-          return "File #{file} not found in your repository" unless File.exist?(repo_file)
+          files.map do |file|
+            diff = diff_file(dir, app_name, file)
+            next diff unless diff.is_a?(String)
 
-          Diffy::Diff.new(
-            File.read(rails_file),
-            File.read(repo_file),
-            include_diff_info: true,
-            context: 2
-          ).to_s(:color)
+            [
+              "\n#{file} diff:",
+              "=" * (10 + file.length),
+              diff
+            ].join("\n")
+          end.join("\n")
         end
       end
 
       private
+
+      def diff_file(dir, app_name, file)
+        rails_file = File.join(dir, app_name, file)
+        repo_file = File.join(Dir.pwd, file)
+
+        return "File #{file} not found in Rails template" unless File.exist?(rails_file)
+        return "File #{file} not found in your repository" unless File.exist?(repo_file)
+
+        Diffy::Diff.new(
+          File.read(rails_file),
+          File.read(repo_file),
+          include_diff_info: true,
+          context: 2
+        ).to_s(:color)
+      end
 
       def generate_rails_app(dir, app_name)
         rails_source_path = File.join(dir, "rails")
@@ -53,9 +67,11 @@ module Rails
     end
 
     class CLI < Thor
-      desc "diff FILE", "Compare a file from your repository with Rails' generated version"
-      def diff(file)
-        puts Rails::Diff.for(file)
+      desc "diff FILE [FILE ...]", "Compare one or more files from your repository with Rails' generated version"
+      def diff(*files)
+        abort "Please provide at least one file to compare" if files.empty?
+
+        puts Rails::Diff.for(*files)
       end
 
       desc "--version, -v", "Show version"
