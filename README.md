@@ -39,7 +39,7 @@ rails-diff file config/routes.rb config/application.rb
 rails-diff file config/routes.rb --clear-cache
 ```
 
-### Compare generated files
+### Compare generator files
 
 ```bash
 # Compare files that would be created by a generator
@@ -50,6 +50,9 @@ rails-diff generated scaffold Post title:string body:text
 
 # Force regenerate Rails app by clearing cache
 rails-diff generated scaffold Post --clear-cache
+
+# Skip specific files or directories during the diff
+rails-diff generated scaffold Post --skip app/views app/helpers
 ```
 
 ## How it works

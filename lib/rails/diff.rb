@@ -21,11 +21,13 @@ module Rails
         files.map { |file| diff_with_header(file) }.join("\n")
       end
 
-      def generated(generator_name, *args, no_cache: false)
+      def generated(generator_name, *args, no_cache: false, skip: [])
         clear_cache if no_cache
         ensure_template_app_exists
         install_app_dependencies
-        new_files = track_generator_files(generator_name, *args)
+
+        command = "#{generator_name} #{args.join(' ')}"
+        new_files = track_generator_files(command, skip)
 
         new_files.map { |file| diff_generated_file(file) }.join("\n\n")
       end
@@ -49,28 +51,29 @@ module Rails
         FileUtils.rm_rf(CACHE_DIR)
       end
 
-      def list_files(dir)
-        Dir.glob("#{dir}/**/*", File::FNM_DOTMATCH)
-           .reject { |f| File.directory?(f) }
-           .reject { |f| f.end_with?(".git") }
-           .reject { |f| f.start_with?("#{dir}/tmp") }
-           .reject { |f| f.start_with?("#{dir}/log") }
-           .reject { |f| f.start_with?("#{dir}/test") }
+      def list_files(dir, skip = [])
+        Dir.glob("#{dir}/**/*", File::FNM_DOTMATCH).reject do |f|
+          File.directory?(f) ||
+            f.start_with?("#{dir}/.git") ||
+            f.start_with?("#{dir}/tmp") ||
+            f.start_with?("#{dir}/log") ||
+            f.start_with?("#{dir}/test") ||
+            skip.any? { |s| f.start_with?("#{dir}/#{s}") }
+        end
       end
 
-      def track_new_files
+      def track_new_files(skip)
         files_before = list_files(template_app_path)
         yield
-        files_after = list_files(template_app_path)
+        files_after = list_files(template_app_path, skip)
         files_after - files_before
       end
 
-      def track_generator_files(generator_name, *args)
-        command = "#{generator_name} #{args.join(" ")}"
+      def track_generator_files(command, skip)
         Dir.chdir(template_app_path) do
           system("bin/rails destroy #{command} >/dev/null 2>&1")
           puts "Running generator: rails generate #{command}"
-          track_new_files { system("bin/rails generate #{command} > /dev/null 2>&1") }
+          track_new_files(skip) { system("bin/rails generate #{command} > /dev/null 2>&1") }
         end
       end
 
@@ -169,6 +172,7 @@ module Rails
 
     class CLI < Thor
       class_option :no_cache, type: :boolean, desc: "Clear cache before running", aliases: ["--clear-cache"]
+      def self.exit_on_failure? = true
 
       desc "file FILE [FILE ...]", "Compare one or more files from your repository with Rails' generated version"
       def file(*files)
@@ -178,8 +182,9 @@ module Rails
       end
 
       desc "generated GENERATOR [args]", "Compare files that would be created by a Rails generator"
+      option :skip, type: :array, desc: "Skip specific files or directories", aliases: ["-s"], default: []
       def generated(generator_name, *args)
-        puts Rails::Diff.generated(generator_name, *args, no_cache: options[:no_cache])
+        puts Rails::Diff.generated(generator_name, *args, no_cache: options[:no_cache], skip: options[:skip])
       end
     end
   end
