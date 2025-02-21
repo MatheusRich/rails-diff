@@ -37,6 +37,9 @@ rails-diff file Dockerfile Gemfile
 
 # Force regenerate Rails app by clearing cache
 rails-diff file Dockerfile --clear-cache
+
+# Fail if there are differences (useful for CI)
+rails-diff file Dockerfile --fail-on-diff
 ```
 
 ### Compare generator files
@@ -53,7 +56,16 @@ rails-diff generated scaffold Post --clear-cache
 
 # Skip specific files or directories during the diff
 rails-diff generated scaffold Post --skip app/views app/helpers
+
+# Fail if there are differences (useful for CI)
+rails-diff generated scaffold Post --fail-on-diff
 ```
+
+### Options
+
+#### --fail-on-diff
+
+If this option is specified, the command will exit with a non-zero status code if there are any differences between your files and the generated ones. This can be particularly useful when using the gem in Continuous Integration (CI) environments.
 
 ## How it works
 

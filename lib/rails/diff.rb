@@ -164,6 +164,7 @@ module Rails
 
     class CLI < Thor
       class_option :no_cache, type: :boolean, desc: "Clear cache before running", aliases: ["--clear-cache"]
+      class_option :fail_on_diff, type: :boolean, desc: "Fail if there are differences"
       def self.exit_on_failure? = true
 
       desc "file FILE [FILE ...]", "Compare one or more files from your repository with Rails' generated version"
@@ -173,7 +174,7 @@ module Rails
         diff = Rails::Diff.file(*files, no_cache: options[:no_cache])
         return if diff.empty?
 
-        puts diff
+        options[:fail] ? abort(diff) : puts(diff)
       end
 
       desc "generated GENERATOR [args]", "Compare files that would be created by a Rails generator"
@@ -182,7 +183,7 @@ module Rails
         diff = Rails::Diff.generated(generator_name, *args, no_cache: options[:no_cache], skip: options[:skip])
         return if diff.empty?
 
-        puts diff
+        options[:fail] ? abort(diff) : puts(diff)
       end
     end
   end
