@@ -14,7 +14,9 @@ module Rails
     CACHE_DIR = File.expand_path("~/.rails-diff/cache")
 
     class << self
-      def file(*files)
+      def file(*files, clear: false)
+        clear_cache if clear
+        
         app_name = File.basename(Dir.pwd)
         generate_template_app(app_name)
 
@@ -28,7 +30,9 @@ module Rails
         end.join("\n")
       end
 
-      def generated(generator_name, *args)
+      def generated(generator_name, *args, clear: false)
+        clear_cache if clear
+        
         app_name = File.basename(Dir.pwd)
         generate_template_app(app_name)
 
@@ -59,6 +63,11 @@ module Rails
       end
 
       private
+
+      def clear_cache
+        puts "Clearing cache..."
+        FileUtils.rm_rf(CACHE_DIR)
+      end
 
       def list_files(dir)
         Dir.glob("#{dir}/**/*", File::FNM_DOTMATCH)
@@ -142,16 +151,18 @@ module Rails
     end
 
     class CLI < Thor
+      class_option :clear_cache, type: :boolean, desc: "Clear cache before running"
+
       desc "file FILE [FILE ...]", "Compare one or more files from your repository with Rails' generated version"
       def file(*files)
         abort "Please provide at least one file to compare" if files.empty?
 
-        puts Rails::Diff.file(*files)
+        puts Rails::Diff.file(*files, clear: options[:clear_cache])
       end
 
       desc "generated GENERATOR [args]", "Compare files that would be created by a Rails generator"
       def generated(generator_name, *args)
-        puts Rails::Diff.generated(generator_name, *args)
+        puts Rails::Diff.generated(generator_name, *args, clear: options[:clear_cache])
       end
     end
   end

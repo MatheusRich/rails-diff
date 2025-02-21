@@ -34,6 +34,9 @@ rails-diff file config/routes.rb
 
 # Compare multiple files
 rails-diff file config/routes.rb config/application.rb
+
+# Force regenerate Rails app by clearing cache
+rails-diff file config/routes.rb --clear-cache
 ```
 
 ### Compare generated files
@@ -44,6 +47,9 @@ rails-diff generated authentication
 
 # Compare files with generator arguments
 rails-diff generated scaffold Post title:string body:text
+
+# Force regenerate Rails app by clearing cache
+rails-diff generated scaffold Post --clear-cache
 ```
 
 ## How it works
@@ -53,6 +59,14 @@ When you run the diff, it will:
 1. Clone the latest Rails from main branch
 1. Generate a new Rails app with the same name as yours
 1. Show you a colored diff between your file and the generated one
+
+### Cache
+
+The gem caches the generated Rails application to avoid regenerating it on every run. The cache is automatically invalidated when:
+- Rails has new commits on main
+- The cache directory doesn't exist
+
+You can also force clear the cache by using the `--clear-cache` option with any command.
 
 ## Development
 
