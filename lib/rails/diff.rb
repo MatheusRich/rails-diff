@@ -26,7 +26,7 @@ module Rails
         ensure_template_app_exists
         install_app_dependencies
 
-        generated_files(skip)
+        generated_files(generator_name, *args, skip)
           .map { |it| diff_generated_file(it) }
           .join("\n\n")
       end
@@ -68,7 +68,7 @@ module Rails
         files_after - files_before
       end
 
-      def generated_files(skip)
+      def generated_files(generator_name, *args, skip)
         command = "#{generator_name} #{args.join(' ')}"
         Dir.chdir(template_app_path) do
           system("bin/rails destroy #{command} >/dev/null 2>&1")
