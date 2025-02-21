@@ -14,7 +14,7 @@ module Rails
     CACHE_DIR = File.expand_path("~/.rails-diff/cache")
 
     class << self
-      def for(*files)
+      def file(*files)
         app_name = File.basename(Dir.pwd)
         generate_template_app(app_name)
 
@@ -142,11 +142,11 @@ module Rails
     end
 
     class CLI < Thor
-      desc "diff FILE [FILE ...]", "Compare one or more files from your repository with Rails' generated version"
-      def diff(*files)
+      desc "file FILE [FILE ...]", "Compare one or more files from your repository with Rails' generated version"
+      def file(*files)
         abort "Please provide at least one file to compare" if files.empty?
 
-        puts Rails::Diff.for(*files)
+        puts Rails::Diff.file(*files)
       end
 
       desc "generated GENERATOR [args]", "Compare files that would be created by a Rails generator"
