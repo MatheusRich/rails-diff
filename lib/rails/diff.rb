@@ -25,9 +25,7 @@ module Rails
         clear_cache if no_cache
         ensure_template_app_exists
         install_app_dependencies
-
-        command = "#{generator_name} #{args.join(' ')}"
-        new_files = track_generator_files(command, skip)
+        new_files = track_generator_files(skip)
 
         new_files.map { |file| diff_generated_file(file) }.join("\n\n")
       end
@@ -69,7 +67,8 @@ module Rails
         files_after - files_before
       end
 
-      def track_generator_files(command, skip)
+      def track_generator_files(skip)
+        command = "#{generator_name} #{args.join(' ')}"
         Dir.chdir(template_app_path) do
           system("bin/rails destroy #{command} >/dev/null 2>&1")
           puts "Running generator: rails generate #{command}"
