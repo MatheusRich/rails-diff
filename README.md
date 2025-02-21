@@ -66,7 +66,7 @@ The gem caches the generated Rails application to avoid regenerating it on every
 - Rails has new commits on main
 - The cache directory doesn't exist
 
-You can also force clear the cache by using the `--clear-cache` option with any command.
+You can also force clear the cache by using the `--no-cache` option (or its alias `--clear-cache`) with any command.
 
 ## Development
 
