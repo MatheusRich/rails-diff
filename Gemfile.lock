@@ -2,9 +2,9 @@ PATH
   remote: .
   specs:
     rails-diff (0.1.0)
-      diffy
-      rails (>= 8.0)
-      thor
+      diffy (~> 3.4)
+      rails (>= 7.0)
+      thor (~> 1.0)
 
 GEM
   remote: https://rubygems.org/
