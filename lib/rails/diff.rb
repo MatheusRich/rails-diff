@@ -16,25 +16,63 @@ module Rails
     class << self
       def for(*files)
         app_name = File.basename(Dir.pwd)
-        ensure_rails_app_exists(app_name)
+        generate_template_app(app_name)
 
         files.map do |file|
+          header = "#{file} diff:"
           [
-            "#{file} diff:",
-            "=" * (10 + file.length),
+            header,
+            "=" * header.size,
             diff_file(app_name, file)
+          ].join("\n")
+        end.join("\n")
+      end
+
+      def generated(generator_name, *args)
+        app_name = File.basename(Dir.pwd)
+        generate_template_app(app_name)
+
+        template_app_path = File.join(CACHE_DIR, app_name)
+
+        Dir.chdir(template_app_path) do
+          system("bin/rails destroy #{generator_name} #{args.join(' ')} --quiet >/dev/null 2>&1")
+        end
+
+        files_before = list_files(template_app_path)
+
+        Dir.chdir(template_app_path) do
+          puts "Running generator: rails generate #{generator_name} #{args.join(' ')}"
+          system("bin/rails generate #{generator_name} #{args.join(' ')} --quiet")
+        end
+
+        files_after = list_files(template_app_path)
+        new_files = files_after - files_before
+
+        new_files.map do |file|
+          relative_path = file.delete_prefix("#{template_app_path}/")
+          [
+            "#{relative_path} diff:",
+            "=" * (10 + relative_path.length),
+            diff_file(app_name, relative_path)
           ].join("\n")
         end.join("\n")
       end
 
       private
 
+      def list_files(dir)
+        Dir.glob("#{dir}/**/*", File::FNM_DOTMATCH)
+           .reject { |f| File.directory?(f) }
+           .reject { |f| f.end_with?(".git") }
+           .reject { |f| f.start_with?("#{dir}/tmp") }
+      end
+
       def diff_file(app_name, file)
         rails_file = File.join(CACHE_DIR, app_name, file)
         repo_file = File.join(Dir.pwd, file)
 
-        return "File #{file} not found in Rails template" unless File.exist?(rails_file)
-        return "File #{file} not found in your repository" unless File.exist?(repo_file)
+        return "#{file} not found in Rails template" unless File.exist?(rails_file)
+        return "#{file} not found in your repository" unless File.exist?(repo_file)
 
         Diffy::Diff.new(
           File.read(rails_file),
@@ -44,19 +82,19 @@ module Rails
         ).to_s(:color)
       end
 
-      def ensure_rails_app_exists(app_name)
+      def generate_template_app(app_name)
         FileUtils.mkdir_p(CACHE_DIR)
-        app_path = File.join(CACHE_DIR, app_name)
+        template_app_path = File.join(CACHE_DIR, app_name)
         rails_path = File.join(CACHE_DIR, "rails")
 
-        return if cached_app?(app_path, rails_path)
+        return if cached_app?(template_app_path, rails_path)
 
-        FileUtils.rm_rf(app_path)
-        generate_rails_app(app_path, rails_path)
+        FileUtils.rm_rf(template_app_path)
+        generate_rails_app(template_app_path, rails_path)
       end
 
-      def cached_app?(app_path, rails_path)
-        File.exist?(app_path) && !rails_updated?(rails_path)
+      def cached_app?(template_app_path, rails_path)
+        File.exist?(template_app_path) && !rails_updated?(rails_path)
       end
 
       def rails_updated?(rails_path)
@@ -76,14 +114,14 @@ module Rails
         false
       end
 
-      def generate_rails_app(app_path, rails_path)
+      def generate_rails_app(template_app_path, rails_path)
         unless File.exist?(rails_path)
           system("git clone --depth 1 #{RAILS_REPO} #{rails_path} >/dev/null 2>&1")
         end
 
         Dir.chdir(rails_path) do
           commit = `git rev-parse HEAD`.strip
-          puts "Using Rails #{commit[0..6]}"
+          puts "Using Rails edge (commit #{commit[0..6]})"
 
           unless system("bundle check >/dev/null 2>&1")
             puts "Installing Rails dependencies..."
@@ -92,8 +130,13 @@ module Rails
 
           Dir.chdir("railties") do
             puts "Generating new Rails application..."
-            system("bundle exec rails new #{app_path} --force --no-deps --skip-bundle --skip-test --skip-system-test --quiet")
+            system("bundle exec rails new #{template_app_path} --main --skip-bundle --force --skip-test --skip-system-test --quiet")
           end
+        end
+
+        Dir.chdir(template_app_path) do
+          puts "Installing application dependencies..."
+          system("bundle install >/dev/null 2>&1")
         end
       end
     end
@@ -106,9 +149,9 @@ module Rails
         puts Rails::Diff.for(*files)
       end
 
-      desc "version", "Show version"
-      def version
-        puts Rails::Diff::VERSION
+      desc "generated GENERATOR [args]", "Compare files that would be created by a Rails generator"
+      def generated(generator_name, *args)
+        puts Rails::Diff.generated(generator_name, *args)
       end
     end
   end

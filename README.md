@@ -26,42 +26,24 @@ $ gem install rails-diff
 
 ## Usage
 
-### Command Line
-
-Inside your Rails application directory, run:
+### Compare specific files
 
 ```bash
-$ rails-diff diff FILE [FILE ...]
+# Compare a single file
+rails-diff diff config/routes.rb
+
+# Compare multiple files
+rails-diff diff config/routes.rb config/application.rb
 ```
 
-For example, to compare your Dockerfile with the one from Rails:
+### Compare generated files
 
 ```bash
-$ rails-diff diff Dockerfile
-```
+# Compare files that would be created by a generator
+rails-diff generated authentication
 
-You can also compare multiple files at once:
-
-```bash
-$ rails-diff diff Dockerfile .gitignore config/application.rb
-```
-
-Common files to compare:
-
-- `Dockerfile`
-- `.gitignore`
-- `Gemfile`
-- `config/application.rb`
-
-### Ruby API
-
-You can also use Rails::Diff programmatically in your Ruby code:
-
-```ruby
-require 'rails/diff'
-
-diff = Rails::Diff.for('Dockerfile')
-puts diff
+# Compare files with generator arguments
+rails-diff generated scaffold Post title:string body:text
 ```
 
 ## How it works
