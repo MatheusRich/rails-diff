@@ -16,7 +16,7 @@ module Rails
     class << self
       def file(*files, clear: false)
         clear_cache if clear
-        
+
         app_name = File.basename(Dir.pwd)
         generate_template_app(app_name)
 
@@ -32,13 +32,17 @@ module Rails
 
       def generated(generator_name, *args, clear: false)
         clear_cache if clear
-        
+
         app_name = File.basename(Dir.pwd)
         generate_template_app(app_name)
 
         template_app_path = File.join(CACHE_DIR, app_name)
 
         Dir.chdir(template_app_path) do
+          unless system("bundle check >/dev/null 2>&1")
+            puts "Installing application dependencies..."
+            system("bundle install >/dev/null 2>&1")
+          end
           system("bin/rails destroy #{generator_name} #{args.join(' ')} --quiet >/dev/null 2>&1")
         end
 
@@ -141,11 +145,6 @@ module Rails
             puts "Generating new Rails application..."
             system("bundle exec rails new #{template_app_path} --main --skip-bundle --force --skip-test --skip-system-test --quiet")
           end
-        end
-
-        Dir.chdir(template_app_path) do
-          puts "Installing application dependencies..."
-          system("bundle install >/dev/null 2>&1")
         end
       end
     end
