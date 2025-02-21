@@ -30,13 +30,13 @@ $ gem install rails-diff
 
 ```bash
 # Compare a single file
-rails-diff file config/routes.rb
+rails-diff file Dockerfile
 
 # Compare multiple files
-rails-diff file config/routes.rb config/application.rb
+rails-diff file Dockerfile Gemfile
 
 # Force regenerate Rails app by clearing cache
-rails-diff file config/routes.rb --clear-cache
+rails-diff file Dockerfile --clear-cache
 ```
 
 ### Compare generator files
