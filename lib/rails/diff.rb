@@ -25,9 +25,10 @@ module Rails
         clear_cache if no_cache
         ensure_template_app_exists
         install_app_dependencies
-        new_files = track_generator_files(skip)
 
-        new_files.map { |file| diff_generated_file(file) }.join("\n\n")
+        generated_files(skip)
+          .map { |it| diff_generated_file(it) }
+          .join("\n\n")
       end
 
       private
@@ -50,13 +51,13 @@ module Rails
       end
 
       def list_files(dir, skip = [])
-        Dir.glob("#{dir}/**/*", File::FNM_DOTMATCH).reject do |f|
-          File.directory?(f) ||
-            f.start_with?("#{dir}/.git") ||
-            f.start_with?("#{dir}/tmp") ||
-            f.start_with?("#{dir}/log") ||
-            f.start_with?("#{dir}/test") ||
-            skip.any? { |s| f.start_with?("#{dir}/#{s}") }
+        Dir.glob("#{dir}/**/*", File::FNM_DOTMATCH).reject do |it|
+          File.directory?(it) ||
+            it.start_with?("#{dir}/.git") ||
+            it.start_with?("#{dir}/tmp") ||
+            it.start_with?("#{dir}/log") ||
+            it.start_with?("#{dir}/test") ||
+            skip.any? { |s| it.start_with?("#{dir}/#{s}") }
         end
       end
 
@@ -67,7 +68,7 @@ module Rails
         files_after - files_before
       end
 
-      def track_generator_files(skip)
+      def generated_files(skip)
         command = "#{generator_name} #{args.join(' ')}"
         Dir.chdir(template_app_path) do
           system("bin/rails destroy #{command} >/dev/null 2>&1")
