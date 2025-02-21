@@ -10,14 +10,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Ruby ${{ matrix.ruby }}
+    name: Ruby ${{ matrix.ruby }} / Rails ${{ matrix.rails }}
     strategy:
       matrix:
-        ruby:
-          - '3.2'
-          - '3.3'
-          - '3.4'
-
+        ruby: [ '3.2', '3.3', '3.4' ]
+        rails: [ '7.x', '8.x' ]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Ruby
@@ -25,5 +22,7 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
+      - name: Set Rails version environment variable
+        run: echo "RAILS_VERSION=${{ matrix.rails }}" >> $GITHUB_ENV
       - name: Run the default task
         run: bundle exec rake
