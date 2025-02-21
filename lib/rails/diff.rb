@@ -25,9 +25,9 @@ module Rails
         clear_cache if no_cache
         ensure_template_app_exists
         install_app_dependencies
-        new_files = track_new_files { run_generator(generator_name, *args) }
+        new_files = track_generator_files(generator_name, *args)
 
-        new_files.map { |file| diff_generated_file(file) }.join("\n")
+        new_files.map { |file| diff_generated_file(file) }.join("\n\n")
       end
 
       private
@@ -54,6 +54,8 @@ module Rails
            .reject { |f| File.directory?(f) }
            .reject { |f| f.end_with?(".git") }
            .reject { |f| f.start_with?("#{dir}/tmp") }
+           .reject { |f| f.start_with?("#{dir}/log") }
+           .reject { |f| f.start_with?("#{dir}/test") }
       end
 
       def track_new_files
@@ -61,6 +63,15 @@ module Rails
         yield
         files_after = list_files(template_app_path)
         files_after - files_before
+      end
+
+      def track_generator_files(generator_name, *args)
+        command = "#{generator_name} #{args.join(" ")}"
+        Dir.chdir(template_app_path) do
+          system("bin/rails destroy #{command} >/dev/null 2>&1")
+          puts "Running generator: rails generate #{command}"
+          track_new_files { system("bin/rails generate #{command} > /dev/null 2>&1") }
+        end
       end
 
       def diff_with_header(file)
@@ -83,19 +94,10 @@ module Rails
 
       def install_app_dependencies
         Dir.chdir(template_app_path) do
-          # unless system("bundle check >/dev/null 2>&1")
+          unless system("bundle check >/dev/null 2>&1")
             puts "Installing application dependencies..."
             system("bundle install >/dev/null 2>&1")
-          # end
-        end
-      end
-
-      def run_generator(generator_name, *args)
-        Dir.chdir(template_app_path) do
-          command = "#{generator_name} #{args.join(' ')}"
-          system("bin/rails destroy #{command} >/dev/null 2>&1")
-          puts "Running generator: rails generate #{command}"
-          system("bin/rails generate #{command} --quiet")
+          end
         end
       end
 
