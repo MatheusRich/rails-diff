@@ -18,7 +18,7 @@ module Rails
         clear_cache if no_cache
         ensure_template_app_exists
 
-        files.map { |file| diff_with_header(file) }.join("\n")
+        files.filter_map { |it| diff_with_header(it) }.join("\n")
       end
 
       def generated(generator_name, *args, no_cache: false, skip: [])
@@ -27,7 +27,7 @@ module Rails
         install_app_dependencies
 
         generated_files(generator_name, *args, skip)
-          .map { |it| diff_generated_file(it) }
+          .map { |it| diff_with_header(it) }
           .join("\n\n")
       end
 
@@ -74,25 +74,16 @@ module Rails
           system("bin/rails destroy #{command} >/dev/null 2>&1")
           puts "Running generator: rails generate #{command}"
           track_new_files(skip) { system("bin/rails generate #{command} > /dev/null 2>&1") }
+            .map { |it| it.delete_prefix("#{template_app_path}/") }
         end
       end
 
       def diff_with_header(file)
-        header = "#{file} diff:"
-        [
-          header,
-          "=" * header.size,
-          diff_file(file)
-        ].join("\n")
-      end
+        diff = diff_file(file)
+        return if diff.empty?
 
-      def diff_generated_file(file)
-        relative_path = file.delete_prefix("#{template_app_path}/")
-        [
-          "#{relative_path} diff:",
-          "=" * (10 + relative_path.length),
-          diff_file(relative_path)
-        ].join("\n")
+        header = "#{file} diff:"
+        [header, "=" * header.size, diff].join("\n")
       end
 
       def install_app_dependencies
@@ -112,10 +103,11 @@ module Rails
         return "#{file} not found in your repository" unless File.exist?(repo_file)
 
         Diffy::Diff.new(
-          File.read(rails_file),
-          File.read(repo_file),
-          context: 2
-        ).to_s(:color)
+          rails_file,
+          repo_file,
+          context: 2,
+          source: 'files'
+        ).to_s(:color).chomp
       end
 
       def ensure_template_app_exists
@@ -178,13 +170,19 @@ module Rails
       def file(*files)
         abort "Please provide at least one file to compare" if files.empty?
 
-        puts Rails::Diff.file(*files, no_cache: options[:no_cache])
+        diff = Rails::Diff.file(*files, no_cache: options[:no_cache])
+        return if diff.empty?
+
+        puts diff
       end
 
       desc "generated GENERATOR [args]", "Compare files that would be created by a Rails generator"
       option :skip, type: :array, desc: "Skip specific files or directories", aliases: ["-s"], default: []
       def generated(generator_name, *args)
-        puts Rails::Diff.generated(generator_name, *args, no_cache: options[:no_cache], skip: options[:skip])
+        diff = Rails::Diff.generated(generator_name, *args, no_cache: options[:no_cache], skip: options[:skip])
+        return if diff.empty?
+
+        puts diff
       end
     end
   end
