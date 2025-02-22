@@ -40,6 +40,9 @@ rails-diff file Dockerfile --clear-cache
 
 # Fail if there are differences (useful for CI)
 rails-diff file Dockerfile --fail-on-diff
+
+# Compare a specific commit
+rails-diff file Dockerfile --commit 7df1b8
 ```
 
 ### Compare generator files
@@ -59,6 +62,9 @@ rails-diff generated scaffold Post --skip app/views app/helpers
 
 # Fail if there are differences (useful for CI)
 rails-diff generated scaffold Post --fail-on-diff
+
+# Compare a specific commit
+rails-diff generated authentication --commit 7df1b8
 ```
 
 ### Options
@@ -66,6 +72,11 @@ rails-diff generated scaffold Post --fail-on-diff
 #### --fail-on-diff
 
 If this option is specified, the command will exit with a non-zero status code if there are any differences between your files and the generated ones. This can be particularly useful when using the gem in Continuous Integration (CI) environments.
+
+#### --commit <commit_hash>
+
+Specify the commit hash you want to compare against. If not provided, the latest
+commit on main will be used by default.
 
 ## How it works
 
