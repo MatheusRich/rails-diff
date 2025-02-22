@@ -33,20 +33,34 @@ module Rails
 
       private
 
+      def clear_cache
+        puts "Clearing cache..."
+        FileUtils.rm_rf(CACHE_DIR)
+      end
+
+      def ensure_template_app_exists(commit)
+        FileUtils.mkdir_p(CACHE_DIR)
+        @commit = commit || latest_commit
+        return if cached_app?
+
+        FileUtils.rm_rf(template_app_path)
+        create_new_rails_app
+      end
+
       def template_app_path
         @template_app_path ||= File.join(CACHE_DIR, commit, app_name)
       end
 
       def rails_path
-        @rails_path ||= File.join(CACHE_DIR, "rails")
+        @rails_path ||= begin
+          path = File.join(CACHE_DIR, "rails")
+          unless File.exist?(path)
+            system("git clone --depth 1 #{RAILS_REPO} #{path} >/dev/null 2>&1")
+          end
+        end
       end
 
       def app_name = @app_name ||= File.basename(Dir.pwd)
-
-      def clear_cache
-        puts "Clearing cache..."
-        FileUtils.rm_rf(CACHE_DIR)
-      end
 
       def list_files(dir, skip = [])
         Dir.glob("#{dir}/**/*", File::FNM_DOTMATCH).reject do |it|
@@ -108,14 +122,7 @@ module Rails
         ).to_s(:color).chomp
       end
 
-      def ensure_template_app_exists(commit)
-        FileUtils.mkdir_p(CACHE_DIR)
-        @commit = commit || latest_commit
-        return if cached_app?
 
-        FileUtils.rm_rf(template_app_path)
-        create_new_rails_app
-      end
 
       def cached_app?
         File.exist?(template_app_path) && !rails_updated?
@@ -139,10 +146,6 @@ module Rails
       end
 
       def create_new_rails_app
-        unless File.exist?(rails_path)
-          system("git clone --depth 1 #{RAILS_REPO} #{rails_path} >/dev/null 2>&1")
-        end
-
         Dir.chdir(rails_path) do
           checkout_rails
           generate_app
@@ -151,7 +154,12 @@ module Rails
 
       def generate_app
         Dir.chdir("railties") do
-          puts "Generating new Rails application..."
+          unless system("bundle check >/dev/null 2>&1")
+            puts "Installing Rails dependencies"
+            system("bundle install >/dev/null 2>&1")
+          end
+
+          puts "Generating new Rails application"
           system("bundle exec rails new #{template_app_path} --main --skip-bundle --force --skip-test --skip-system-test --quiet")
         end
       end
