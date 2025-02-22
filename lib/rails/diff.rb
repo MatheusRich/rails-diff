@@ -34,7 +34,7 @@ module Rails
       private
 
       def clear_cache
-        puts "Clearing cache..."
+        puts "Clearing cache"
         FileUtils.rm_rf(CACHE_DIR)
       end
 
@@ -53,9 +53,10 @@ module Rails
 
       def rails_path
         @rails_path ||= begin
-          path = File.join(CACHE_DIR, "rails")
-          unless File.exist?(path)
-            system("git clone --depth 1 #{RAILS_REPO} #{path} >/dev/null 2>&1")
+          File.join(CACHE_DIR, "rails").tap do |path|
+            unless File.exist?(path)
+              system("git clone --depth 1 #{RAILS_REPO} #{path} >/dev/null 2>&1")
+            end
           end
         end
       end
@@ -101,7 +102,7 @@ module Rails
       def install_app_dependencies
         Dir.chdir(template_app_path) do
           unless system("bundle check >/dev/null 2>&1")
-            puts "Installing application dependencies..."
+            puts "Installing application dependencies"
             system("bundle install >/dev/null 2>&1")
           end
         end
@@ -121,8 +122,6 @@ module Rails
           source: 'files'
         ).to_s(:color).chomp
       end
-
-
 
       def cached_app?
         File.exist?(template_app_path) && !rails_updated?
