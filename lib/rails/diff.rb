@@ -202,6 +202,12 @@ module Rails
 
         options[:fail] ? abort(diff) : puts(diff)
       end
+
+      map %w[--version -v] => :__version
+      desc "--version, -v", "print the version"
+      def __version
+        puts VERSION
+      end
     end
   end
 end
