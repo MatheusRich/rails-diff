@@ -43,7 +43,6 @@ module Rails
         @commit = commit || latest_commit
         return if cached_app?
 
-        FileUtils.rm_rf(template_app_path)
         create_new_rails_app
       end
 
@@ -124,11 +123,11 @@ module Rails
       end
 
       def cached_app?
-        File.exist?(template_app_path) && !rails_updated?
+        File.exist?(template_app_path) && !out_of_date_rails?
       end
 
-      def rails_updated?
-        return true if !File.exist?(rails_path)
+      def out_of_date_rails?
+        return true unless File.exist?(rails_path)
 
         Dir.chdir(rails_path) do
           system("git fetch origin main >/dev/null 2>&1")
@@ -152,6 +151,7 @@ module Rails
       end
 
       def generate_app
+        FileUtils.rm_rf(template_app_path)
         Dir.chdir("railties") do
           unless system("bundle check >/dev/null 2>&1")
             puts "Installing Rails dependencies"
