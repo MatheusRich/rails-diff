@@ -14,16 +14,16 @@ module Rails
     CACHE_DIR = File.expand_path("~/.rails-diff/cache")
 
     class << self
-      def file(*files, no_cache: false, commit: nil)
+      def file(*files, no_cache: false, commit: nil, new_app_options: nil)
         clear_cache if no_cache
-        ensure_template_app_exists(commit)
+        ensure_template_app_exists(commit, new_app_options)
 
         files.filter_map { |it| diff_with_header(it) }.join("\n")
       end
 
-      def generated(generator_name, *args, no_cache: false, skip: [], commit: nil)
+      def generated(generator_name, *args, no_cache: false, skip: [], commit: nil, new_app_options: nil)
         clear_cache if no_cache
-        ensure_template_app_exists(commit)
+        ensure_template_app_exists(commit, new_app_options)
         install_app_dependencies
 
         generated_files(generator_name, *args, skip)
@@ -38,8 +38,9 @@ module Rails
         FileUtils.rm_rf(CACHE_DIR)
       end
 
-      def ensure_template_app_exists(commit)
+      def ensure_template_app_exists(commit, new_app_options)
         FileUtils.mkdir_p(CACHE_DIR)
+        @new_app_options = new_app_options
         @commit = commit || latest_commit
         return if cached_app?
 
@@ -47,7 +48,7 @@ module Rails
       end
 
       def template_app_path
-        @template_app_path ||= File.join(CACHE_DIR, commit, app_name)
+        @template_app_path ||= File.join(CACHE_DIR, commit, new_app_options_hash, app_name)
       end
 
       def rails_path
@@ -159,7 +160,7 @@ module Rails
           end
 
           puts "Generating new Rails application"
-          system("bundle exec rails new #{template_app_path} --main --skip-bundle --force --skip-test --skip-system-test --quiet")
+          system("bundle exec rails new #{template_app_path} --main --skip-bundle --force --skip-test --skip-system-test --quiet #{new_app_options}")
         end
       end
 
@@ -170,10 +171,16 @@ module Rails
 
       def commit = @commit
 
+      def new_app_options = @new_app_options
+
       def latest_commit
         Dir.chdir(rails_path) do
           `git rev-parse origin/main`.strip
         end
+      end
+
+      def new_app_options_hash
+        Digest::SHA256.hexdigest(new_app_options.to_s)
       end
     end
 
@@ -181,6 +188,7 @@ module Rails
       class_option :no_cache, type: :boolean, desc: "Clear cache before running", aliases: ["--clear-cache"]
       class_option :fail_on_diff, type: :boolean, desc: "Fail if there are differences"
       class_option :commit, type: :string, desc: "Compare against a specific commit"
+      class_option :new_app_options, type: :string, desc: "Options to pass to the rails new command"
 
       def self.exit_on_failure? = true
 
@@ -188,7 +196,7 @@ module Rails
       def file(*files)
         abort "Please provide at least one file to compare" if files.empty?
 
-        diff = Rails::Diff.file(*files, no_cache: options[:no_cache], commit: options[:commit])
+        diff = Rails::Diff.file(*files, no_cache: options[:no_cache], commit: options[:commit], new_app_options: options[:new_app_options])
         return if diff.empty?
 
         options[:fail] ? abort(diff) : puts(diff)
@@ -197,7 +205,7 @@ module Rails
       desc "generated GENERATOR [args]", "Compare files that would be created by a Rails generator"
       option :skip, type: :array, desc: "Skip specific files or directories", aliases: ["-s"], default: []
       def generated(generator_name, *args)
-        diff = Rails::Diff.generated(generator_name, *args, no_cache: options[:no_cache], skip: options[:skip], commit: options[:commit])
+        diff = Rails::Diff.generated(generator_name, *args, no_cache: options[:no_cache], skip: options[:skip], commit: options[:commit], new_app_options: options[:new_app_options])
         return if diff.empty?
 
         options[:fail] ? abort(diff) : puts(diff)

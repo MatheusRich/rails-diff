@@ -78,6 +78,16 @@ If this option is specified, the command will exit with a non-zero status code i
 Specify the commit hash you want to compare against. If not provided, the latest
 commit on main will be used by default.
 
+#### --new-app-options <options>
+
+Specify additional options to be used with the `rails new` command. This allows you to customize the generated Rails application, for example, by specifying a different database.
+
+Example:
+
+```bash
+rails-diff file Dockerfile --new-app-options="--database=postgresql"
+```
+
 ## How it works
 
 When you run the diff, it will:
