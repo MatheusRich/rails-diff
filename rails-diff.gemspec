@@ -34,7 +34,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "rails", ">= 7.0"
-  spec.add_dependency "diffy", "~> 3.4"
+  spec.add_dependency "difftastic", "~> 0.7"
   spec.add_dependency "thor", "~> 1.0"
 
   # For more information and examples about making a new gem, check out our
