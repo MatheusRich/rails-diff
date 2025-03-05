@@ -49,7 +49,7 @@ module Rails
       end
 
       def template_app_path
-        @template_app_path ||= File.join(CACHE_DIR, commit, new_app_options_hash, app_name)
+        @template_app_path ||= File.join(CACHE_DIR, commit, rails_new_options_hash, app_name)
       end
 
       def rails_path
@@ -167,14 +167,12 @@ module Rails
             system("bundle install >/dev/null 2>&1")
           end
 
-          rails_new_command = "bundle exec rails new #{template_app_path} --main --skip-bundle --force --skip-test --skip-system-test --quiet #{new_app_options}"
-
           if railsrc_options
-            rails_new_command = "#{rails_new_command} #{railsrc_options}"
-
             puts "Using default options from #{railsrc_path}:"
             puts "  > #{railsrc_options}\n\n"
           end
+
+          rails_new_command = "bundle exec rails new #{template_app_path} --main --skip-bundle --force --skip-test --skip-system-test --quiet #{rails_new_options}"
 
           puts "Generating new Rails application"
           puts "  > #{rails_new_command}\n\n"
@@ -198,9 +196,9 @@ module Rails
         end
       end
 
-      def new_app_options_hash
-        Digest::SHA256.hexdigest(new_app_options.to_s)
-      end
+      def rails_new_options = [new_app_options, railsrc_options].compact.join(" ")
+
+      def rails_new_options_hash = Digest::SHA256.hexdigest(rails_new_options)
     end
 
     class CLI < Thor
