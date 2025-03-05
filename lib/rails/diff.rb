@@ -61,6 +61,16 @@ module Rails
         end
       end
 
+      def railsrc_path
+        "#{ENV["HOME"]}/.railsrc"
+      end
+
+      def railsrc_options
+        return @railsrc_options if defined?(@railsrc_options)
+
+        @railsrc_options = File.read(railsrc_path).tr("\n", " ") if File.exist?(railsrc_path)
+      end
+
       def app_name = @app_name ||= File.basename(Dir.pwd)
 
       def list_files(dir, skip = [])
@@ -159,8 +169,19 @@ module Rails
             system("bundle install >/dev/null 2>&1")
           end
 
+          rails_new_command = "bundle exec rails new #{template_app_path} --main --skip-bundle --force --skip-test --skip-system-test --quiet #{new_app_options}"
+
+          if railsrc_options
+            rails_new_command = "#{rails_new_command} #{railsrc_options}"
+
+            puts "Using default options from #{railsrc_path}:"
+            puts "  > #{railsrc_options}\n\n"
+          end
+
           puts "Generating new Rails application"
-          system("bundle exec rails new #{template_app_path} --main --skip-bundle --force --skip-test --skip-system-test --quiet #{new_app_options}")
+          puts "  > #{rails_new_command}\n\n"
+
+          system(rails_new_command)
         end
       end
 
