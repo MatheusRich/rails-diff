@@ -56,6 +56,7 @@ module Rails
         @rails_path ||= begin
           File.join(CACHE_DIR, "rails").tap do |path|
             unless File.exist?(path)
+              puts "Cloning Rails repository"
               system("git clone --depth 1 #{RAILS_REPO} #{path} >/dev/null 2>&1")
             end
           end
