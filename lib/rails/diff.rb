@@ -11,7 +11,8 @@ module Rails
     class Error < StandardError; end
 
     RAILS_REPO = "https://github.com/rails/rails.git"
-    CACHE_DIR = File.expand_path("~/.rails-diff/cache")
+    CACHE_DIR = File.expand_path("#{ENV["HOME"]}/.rails-diff/cache")
+    RAILSRC_PATH = "#{ENV["HOME"]}/.railsrc"
 
     class << self
       def file(*files, no_cache: false, commit: nil, new_app_options: nil)
@@ -61,14 +62,10 @@ module Rails
         end
       end
 
-      def railsrc_path
-        "#{ENV["HOME"]}/.railsrc"
-      end
-
       def railsrc_options
         return @railsrc_options if defined?(@railsrc_options)
 
-        @railsrc_options = File.read(railsrc_path).tr("\n", " ") if File.exist?(railsrc_path)
+        @railsrc_options = File.read(RAILSRC_PATH).tr("\n", " ") if File.exist?(RAILSRC_PATH)
       end
 
       def app_name = @app_name ||= File.basename(Dir.pwd)
