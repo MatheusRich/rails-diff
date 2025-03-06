@@ -100,7 +100,10 @@ When you run the diff, it will:
 
 The gem caches the generated Rails application to avoid regenerating it on every run. The cache is automatically invalidated when:
 - Rails has new commits on main
-- The cache directory doesn't exist
+- The cache directory doesn't exist (or is cleared with the `--clear-cache` option)
+- You use `--new-app-options` with different options
+- You change your `~/.railsrc` file
+- You use `--commit` with a different commit
 
 You can also force clear the cache by using the `--no-cache` option (or its alias `--clear-cache`) with any command.
 
