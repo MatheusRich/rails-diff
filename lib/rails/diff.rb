@@ -182,13 +182,10 @@ module Rails
           end
 
           if railsrc_options
-            info "Using default options from #{RAILSRC_PATH}:"
-            puts "  > #{railsrc_options.join(' ')}\n\n"
+            info "Using default options from #{RAILSRC_PATH}:\n  > #{railsrc_options.join(' ')}"
           end
 
-          info "Generating new Rails application"
-          puts "  > #{rails_new_command.join(' ')}\n"
-
+          info "Generating new Rails application\n  > #{rails_new_command.join(' ')}"
           system!(*rails_new_command)
         end
       end
