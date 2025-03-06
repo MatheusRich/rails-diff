@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.4.1] - 2025-03-05
+
+- Bump `rack` and `uri` minor versions.
+
 ## [0.4.0] - 2025-03-05
 
 - Respect `~/.railsrc` file when generating new rails apps (PR #4). Thanks [@marcoroth](https://github.com/marcoroth) 🎉
