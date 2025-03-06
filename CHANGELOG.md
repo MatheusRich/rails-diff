@@ -1,5 +1,12 @@
 ## [Unreleased]
 
+## [0.4.0] - 2025-03-05
+
+- Respect `~/.railsrc` file when generating new rails apps (PR #4). Thanks [@marcoroth](https://github.com/marcoroth) 🎉
+- Use array version of `system` to avoid command injection.
+- Update cache keys to be shorter.
+- Improve log messages.
+
 ## [0.3.0] - 2025-02-23
 
 - Allow passing options to generate the new application
@@ -38,6 +45,7 @@ M## [0.1.1] - 2025-02-21
 
 - Initial release
 
+[0.4.0]: https://github.com/matheusrich/rails-diff/releases/tag/v0.4.0
 [0.3.0]: https://github.com/matheusrich/rails-diff/releases/tag/v0.3.0
 [0.2.1]: https://github.com/matheusrich/rails-diff/releases/tag/v0.2.1
 [0.2.0]: https://github.com/matheusrich/rails-diff/releases/tag/v0.2.0
