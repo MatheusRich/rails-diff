@@ -5,6 +5,7 @@ require "rails"
 require "thor"
 require "diffy"
 require "fileutils"
+require "open3"
 
 module Rails
   module Diff
@@ -34,8 +35,23 @@ module Rails
 
       private
 
+      def system!(*cmd)
+        _, stderr, status = Open3.capture3(*cmd)
+
+        unless status.success?
+          puts "\e[1;31mCommand failed:\e[0m #{cmd.join(' ')}"
+          abort stderr
+        end
+
+        true
+      end
+
+      def info(message)
+        puts "\e[1;34minfo:\e[0m #{message}"
+      end
+
       def clear_cache
-        puts "Clearing cache"
+        info "Clearing cache"
         FileUtils.rm_rf(CACHE_DIR)
       end
 
@@ -56,8 +72,8 @@ module Rails
         @rails_path ||= begin
           File.join(CACHE_DIR, "rails").tap do |path|
             unless File.exist?(path)
-              puts "Cloning Rails repository"
-              system("git clone --depth 1 #{RAILS_REPO} #{path} >/dev/null 2>&1")
+              info "Cloning Rails repository"
+              system!("git", "clone", "--depth", "1", RAILS_REPO, path)
             end
           end
         end
@@ -66,7 +82,7 @@ module Rails
       def railsrc_options
         return @railsrc_options if defined?(@railsrc_options)
 
-        @railsrc_options = File.read(RAILSRC_PATH).tr("\n", " ") if File.exist?(RAILSRC_PATH)
+        @railsrc_options = File.read(RAILSRC_PATH).lines if File.exist?(RAILSRC_PATH)
       end
 
       def app_name = @app_name ||= File.basename(Dir.pwd)
@@ -90,11 +106,10 @@ module Rails
       end
 
       def generated_files(generator_name, *args, skip)
-        command = "#{generator_name} #{args.join(' ')}"
         Dir.chdir(template_app_path) do
-          system("bin/rails destroy #{command} >/dev/null 2>&1")
-          puts "Running generator: rails generate #{command}"
-          track_new_files(skip) { system("bin/rails generate #{command} > /dev/null 2>&1") }
+          system!("bin/rails", "destroy", generator_name, *args)
+          info "Running generator: rails generate #{generator_name} #{args.join(' ')}"
+          track_new_files(skip) { system!("bin/rails", "generate", generator_name, *args) }
             .map { |it| it.delete_prefix("#{template_app_path}/") }
         end
       end
@@ -109,9 +124,9 @@ module Rails
 
       def install_app_dependencies
         Dir.chdir(template_app_path) do
-          unless system("bundle check >/dev/null 2>&1")
-            puts "Installing application dependencies"
-            system("bundle install >/dev/null 2>&1")
+          unless system!("bundle check")
+            info "Installing application dependencies"
+            system!("bundle install")
           end
         end
       end
@@ -139,7 +154,7 @@ module Rails
         return true unless File.exist?(rails_path)
 
         Dir.chdir(rails_path) do
-          system("git fetch origin main >/dev/null 2>&1")
+          system!("git fetch origin main")
           current = `git rev-parse HEAD`.strip
           latest = `git rev-parse origin/main`.strip
 
@@ -160,30 +175,27 @@ module Rails
       end
 
       def generate_app
-        FileUtils.rm_rf(template_app_path)
         Dir.chdir("railties") do
-          unless system("bundle check >/dev/null 2>&1")
-            puts "Installing Rails dependencies"
-            system("bundle install >/dev/null 2>&1")
+          unless system!("bundle check")
+            info "Installing Rails dependencies"
+            system!("bundle install")
           end
 
           if railsrc_options
-            puts "Using default options from #{railsrc_path}:"
-            puts "  > #{railsrc_options}\n\n"
+            info "Using default options from #{RAILSRC_PATH}:"
+            puts "  > #{railsrc_options.join(' ')}\n\n"
           end
 
-          rails_new_command = "bundle exec rails new #{template_app_path} --main --skip-bundle --force --skip-test --skip-system-test --quiet #{rails_new_options}"
+          info "Generating new Rails application"
+          puts "  > #{rails_new_command.join(' ')}\n"
 
-          puts "Generating new Rails application"
-          puts "  > #{rails_new_command}\n\n"
-
-          system(rails_new_command)
+          system!(*rails_new_command)
         end
       end
 
       def checkout_rails
-        puts "Checking out Rails (at commit #{commit[0..6]})"
-        system("git checkout #{commit} >/dev/null 2>&1")
+        info "Checking out Rails (at commit #{commit[0..6]})"
+        system!("git", "checkout", commit)
       end
 
       def commit = @commit
@@ -196,9 +208,22 @@ module Rails
         end
       end
 
-      def rails_new_options = [new_app_options, railsrc_options].compact.join(" ")
+      def rails_new_command = @rails_new_command ||= [
+          "bundle",
+          "exec",
+          "rails",
+          "new",
+          template_app_path,
+          "--main",
+          "--skip-bundle",
+          "--force",
+          "--quiet",
+          *rails_new_options
+        ]
 
-      def rails_new_options_hash = Digest::SHA256.hexdigest(rails_new_options)
+      def rails_new_options = @rails_new_options ||= [*new_app_options, *railsrc_options].compact
+
+      def rails_new_options_hash = Digest::SHA256.hexdigest(rails_new_options.join(" "))
     end
 
     class CLI < Thor
