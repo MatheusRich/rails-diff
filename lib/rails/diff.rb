@@ -135,8 +135,8 @@ module Rails
         rails_file = File.join(template_app_path, file)
         repo_file = File.join(Dir.pwd, file)
 
-        return "#{file} not found in the Rails template" unless File.exist?(rails_file)
-        return "#{file} not found in your repository" unless File.exist?(repo_file)
+        return "File not found in the Rails template" unless File.exist?(rails_file)
+        return "File not found in your repository" unless File.exist?(repo_file)
 
         Diffy::Diff.new(
           rails_file,
