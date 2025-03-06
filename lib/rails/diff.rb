@@ -65,7 +65,7 @@ module Rails
       end
 
       def template_app_path
-        @template_app_path ||= File.join(CACHE_DIR, commit, rails_new_options_hash, app_name)
+        @template_app_path ||= File.join(CACHE_DIR, "rails-#{commit.first(10)}", rails_new_options_hash, app_name)
       end
 
       def rails_path
@@ -220,7 +220,7 @@ module Rails
 
       def rails_new_options = @rails_new_options ||= [*new_app_options, *railsrc_options].compact
 
-      def rails_new_options_hash = Digest::SHA256.hexdigest(rails_new_options.join(" "))
+      def rails_new_options_hash = Digest::MD5.hexdigest(rails_new_options.join(" "))
     end
 
     class CLI < Thor
