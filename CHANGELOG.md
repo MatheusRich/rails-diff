@@ -1,5 +1,20 @@
 ## [Unreleased]
 
+## [0.4.2] - 2025-03-10
+
+- Don't abort process on bundle check failure.
+- Add optional debug logs.
+
+```sh
+rails-diff file Gemfile --debug
+```
+
+or
+
+```sh
+DEBUG=1 rails-diff file Gemfile
+```
+
 ## [0.4.1] - 2025-03-05
 
 - Bump `rack` and `uri` minor versions.
