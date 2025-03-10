@@ -238,12 +238,14 @@ module Rails
       class_option :fail_on_diff, type: :boolean, desc: "Fail if there are differences"
       class_option :commit, type: :string, desc: "Compare against a specific commit"
       class_option :new_app_options, type: :string, desc: "Options to pass to the rails new command"
+      class_option :debug, type: :boolean, desc: "Print debug information", aliases: ["-d"]
 
       def self.exit_on_failure? = true
 
       desc "file FILE [FILE ...]", "Compare one or more files from your repository with Rails' generated version"
       def file(*files)
         abort "Please provide at least one file to compare" if files.empty?
+        ENV["DEBUG"] = "true" if options[:debug]
 
         diff = Rails::Diff.file(*files, no_cache: options[:no_cache], commit: options[:commit], new_app_options: options[:new_app_options])
         return if diff.empty?
@@ -254,6 +256,7 @@ module Rails
       desc "generated GENERATOR [args]", "Compare files that would be created by a Rails generator"
       option :skip, type: :array, desc: "Skip specific files or directories", aliases: ["-s"], default: []
       def generated(generator_name, *args)
+        ENV["DEBUG"] = "true" if options[:debug]
         diff = Rails::Diff.generated(generator_name, *args, no_cache: options[:no_cache], skip: options[:skip], commit: options[:commit], new_app_options: options[:new_app_options])
         return if diff.empty?
 
