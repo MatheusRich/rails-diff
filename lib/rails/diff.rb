@@ -35,15 +35,19 @@ module Rails
 
       private
 
-      def system!(*cmd)
+      def system!(*cmd, abort: true)
         _, stderr, status = Open3.capture3(*cmd)
 
         unless status.success?
           puts "\e[1;31mCommand failed:\e[0m #{cmd.join(' ')}"
+        if status.success?
+          true
+        elsif abort
+          $stderr.puts "\e[1;31mCommand failed:\e[0m #{cmd.join(' ')}"
           abort stderr
+        else
+          false
         end
-
-        true
       end
 
       def info(message)
@@ -124,7 +128,7 @@ module Rails
 
       def install_app_dependencies
         Dir.chdir(template_app_path) do
-          unless system!("bundle check")
+          unless system!("bundle check", abort: false)
             info "Installing application dependencies"
             system!("bundle install")
           end
@@ -176,7 +180,7 @@ module Rails
 
       def generate_app
         Dir.chdir("railties") do
-          unless system!("bundle check")
+          unless system!("bundle check", abort: false)
             info "Installing Rails dependencies"
             system!("bundle install")
           end
