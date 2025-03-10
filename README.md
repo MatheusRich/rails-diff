@@ -88,6 +88,36 @@ Example:
 rails-diff file Dockerfile --new-app-options="--database=postgresql"
 ```
 
+#### --skip <files/directories>
+
+Skip specific files or directories during the diff.
+
+```bash
+rails-diff generated scaffold Post --skip app/views app/helpers
+```
+
+#### --clear-cache/--no-cache
+
+Clear the cache directory to force cloning Rails and regenerating the Rails template app.
+
+```bash
+rails-diff file Dockerfile --clear-cache
+```
+
+#### --debug
+
+Print debug information.
+
+```sh
+rails-diff file Gemfile --debug
+```
+
+or with an environment variable:
+
+```sh
+DEBUG=1 rails-diff file Gemfile
+```
+
 ## How it works
 
 When you run the diff, it will:
