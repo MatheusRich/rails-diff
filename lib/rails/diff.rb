@@ -38,8 +38,8 @@ module Rails
       def system!(*cmd, abort: true)
         _, stderr, status = Open3.capture3(*cmd)
 
-        unless status.success?
-          puts "\e[1;31mCommand failed:\e[0m #{cmd.join(' ')}"
+        debug cmd.join(" ")
+
         if status.success?
           true
         elsif abort
@@ -51,7 +51,13 @@ module Rails
       end
 
       def info(message)
-        puts "\e[1;34minfo:\e[0m #{message}"
+        puts "\e[1;34minfo:\e[0m\t#{message}"
+      end
+
+      def debug(message)
+        return unless ENV["DEBUG"]
+
+        puts "\e[1;33mdebug:\e[0m\t#{message}"
       end
 
       def clear_cache
@@ -186,10 +192,10 @@ module Rails
           end
 
           if railsrc_options
-            info "Using default options from #{RAILSRC_PATH}:\n  > #{railsrc_options.join(' ')}"
+            info "Using default options from #{RAILSRC_PATH}:\n\t  > #{railsrc_options.join(' ')}"
           end
 
-          info "Generating new Rails application\n  > #{rails_new_command.join(' ')}"
+          info "Generating new Rails application\n\t  > #{rails_new_command.join(' ')}"
           system!(*rails_new_command)
         end
       end
