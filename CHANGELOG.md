@@ -1,6 +1,6 @@
 ## [Unreleased]
 
-## [0.4.2] - 2025-03-10
+## [0.5.0] - 2025-03-10
 
 - Don't abort process on bundle check failure.
 - Add optional debug logs.
