@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "diff/version"
+require_relative "diff/file_tracker"
 require "rails"
 require "thor"
 require "diffy"
@@ -97,29 +98,11 @@ module Rails
 
       def app_name = @app_name ||= File.basename(Dir.pwd)
 
-      def list_files(dir, skip = [])
-        Dir.glob("#{dir}/**/*", File::FNM_DOTMATCH).reject do |it|
-          File.directory?(it) ||
-            it.start_with?("#{dir}/.git") ||
-            it.start_with?("#{dir}/tmp") ||
-            it.start_with?("#{dir}/log") ||
-            it.start_with?("#{dir}/test") ||
-            skip.any? { |s| it.start_with?("#{dir}/#{s}") }
-        end
-      end
-
-      def track_new_files(skip)
-        files_before = list_files(template_app_path)
-        yield
-        files_after = list_files(template_app_path, skip)
-        files_after - files_before
-      end
-
       def generated_files(generator_name, *args, skip)
         Dir.chdir(template_app_path) do
           system!("bin/rails", "destroy", generator_name, *args)
           info "Running generator: rails generate #{generator_name} #{args.join(' ')}"
-          track_new_files(skip) { system!("bin/rails", "generate", generator_name, *args) }
+          FileTracker.new.track_new_files(template_app_path, skip) { system!("bin/rails", "generate", generator_name, *args) }
             .map { |it| it.delete_prefix("#{template_app_path}/") }
         end
       end
