@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "rails/diff"
+$LOAD_PATH.unshift(File.expand_path('../../lib', __dir__))
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

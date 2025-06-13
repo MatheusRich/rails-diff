@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "diff/version"
+require_relative "diff/file_tracker"
 require "rails"
 require "thor"
 require "diffy"
@@ -23,12 +24,12 @@ module Rails
         files.filter_map { |it| diff_with_header(it) }.join("\n")
       end
 
-      def generated(generator_name, *args, no_cache: false, skip: [], commit: nil, new_app_options: nil)
+      def generated(generator_name, *args, no_cache: false, skip: [], only: [], commit: nil, new_app_options: nil)
         clear_cache if no_cache
         ensure_template_app_exists(commit, new_app_options)
         install_app_dependencies
 
-        generated_files(generator_name, *args, skip)
+        generated_files(generator_name, *args, skip, only)
           .map { |it| diff_with_header(it) }
           .join("\n\n")
       end
@@ -97,29 +98,11 @@ module Rails
 
       def app_name = @app_name ||= File.basename(Dir.pwd)
 
-      def list_files(dir, skip = [])
-        Dir.glob("#{dir}/**/*", File::FNM_DOTMATCH).reject do |it|
-          File.directory?(it) ||
-            it.start_with?("#{dir}/.git") ||
-            it.start_with?("#{dir}/tmp") ||
-            it.start_with?("#{dir}/log") ||
-            it.start_with?("#{dir}/test") ||
-            skip.any? { |s| it.start_with?("#{dir}/#{s}") }
-        end
-      end
-
-      def track_new_files(skip)
-        files_before = list_files(template_app_path)
-        yield
-        files_after = list_files(template_app_path, skip)
-        files_after - files_before
-      end
-
-      def generated_files(generator_name, *args, skip)
+      def generated_files(generator_name, *args, skip, only)
         Dir.chdir(template_app_path) do
           system!("bin/rails", "destroy", generator_name, *args)
           info "Running generator: rails generate #{generator_name} #{args.join(' ')}"
-          track_new_files(skip) { system!("bin/rails", "generate", generator_name, *args) }
+          FileTracker.new.track_new_files(template_app_path, skip, only) { system!("bin/rails", "generate", generator_name, *args) }
             .map { |it| it.delete_prefix("#{template_app_path}/") }
         end
       end
@@ -255,9 +238,16 @@ module Rails
 
       desc "generated GENERATOR [args]", "Compare files that would be created by a Rails generator"
       option :skip, type: :array, desc: "Skip specific files or directories", aliases: ["-s"], default: []
+      option :only, type: :array, desc: "Only include specific files or directories", aliases: ["-o"], default: []
       def generated(generator_name, *args)
         ENV["DEBUG"] = "true" if options[:debug]
-        diff = Rails::Diff.generated(generator_name, *args, no_cache: options[:no_cache], skip: options[:skip], commit: options[:commit], new_app_options: options[:new_app_options])
+        diff = Rails::Diff.generated(generator_name, 
+                                     *args, 
+                                     no_cache: options[:no_cache], 
+                                     skip: options[:skip], 
+                                     only: options[:only],
+                                     commit: options[:commit], 
+                                     new_app_options: options[:new_app_options])
         return if diff.empty?
 
         options[:fail] ? abort(diff) : puts(diff)
