@@ -96,6 +96,14 @@ Skip specific files or directories during the diff.
 rails-diff generated scaffold Post --skip app/views app/helpers
 ```
 
+#### --only <files/directories>
+
+Only include specific files or directories in the diff.
+
+```bash
+rails-diff generated scaffold Post --only app/models app/controllers
+```
+
 #### --clear-cache/--no-cache
 
 Clear the cache directory to force cloning Rails and regenerating the Rails template app.

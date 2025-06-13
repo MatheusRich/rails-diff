@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Add `--only` option to only include specific files or directories in the diff.
+
 ## [0.5.0] - 2025-03-10
 
 - Don't abort process on bundle check failure.
