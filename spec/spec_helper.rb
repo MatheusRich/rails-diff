@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+require "simplecov"
+SimpleCov.start do
+  enable_coverage :branch
+  add_filter "/spec/"
+end
+
 require "rails/diff"
 Dir["./spec/support/**/*.rb"].sort.each { |f| require f }
 
