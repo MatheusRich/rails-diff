@@ -27,6 +27,15 @@ module Rails
         options[:fail] ? abort(diff) : puts(diff)
       end
 
+      desc "dotfiles", "Compare dotfiles in your repository with Rails' generated versions"
+      def dotfiles
+        dotfiles = Dir.glob("**/.*").reject do |path|
+          path.start_with?(".git") || path.include?("/.git/")
+        end
+
+        file(*dotfiles)
+      end
+
       desc "generated GENERATOR [args]", "Compare files that would be created by a Rails generator"
       option :skip, type: :array, desc: "Skip specific files or directories", aliases: ["-s"], default: []
       option :only, type: :array, desc: "Only include specific files or directories", aliases: ["-o"], default: []
