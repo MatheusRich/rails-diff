@@ -4,28 +4,38 @@ require "tmpdir"
 class GitRepo
   attr_reader :remote_repo, :commits
 
+  # Executes a shell command, suppressing output if successful, but capturing errors if it fails
+  def run_command(command)
+    result = `#{command} 2>&1`
+    raise "Command failed: #{result}" unless $?.success?
+    result
+  end
+
   # Initializes and creates a bare remote repo and a working repo with main branch
   def initialize
     @remote_dir = Dir.mktmpdir
     @remote_repo = File.join(@remote_dir, "origin.git")
-    Dir.chdir(@remote_dir) { `git init --bare --initial-branch=main origin.git > /dev/null 2>&1` }
-
+    
+    run_command("git init --bare #{@remote_repo}")
+    
+    Dir.chdir(@remote_repo) do
+      `git symbolic-ref HEAD refs/heads/main`
+    end
+    
     @commits = []
     @work_dir = Dir.mktmpdir
     Dir.chdir(@work_dir) do
-      `git clone #{@remote_repo} . > /dev/null 2>&1`
-      `git checkout -b main > /dev/null 2>&1`
+      run_command("git clone #{@remote_repo} .")
+      run_command("git checkout -b main")
       FileUtils.mkdir_p("railties")
       File.write("railties/README", "keep")
-      `git add railties > /dev/null 2>&1`
+      run_command("git add railties")
 
-      `git config user.email 'test@example.com'`
-      `git config user.name 'Test User'`
+      run_command("git config user.email 'test@example.com'")
+      run_command("git config user.name 'Test User'")
 
-      commit_result = `git commit -m "add railties dir" 2>&1`
-      raise "Initial commit failed: #{commit_result}" unless $?.success?
-      @commits << `git rev-parse HEAD`.strip
-      `git push -u origin main > /dev/null 2>&1`
+      commit_result = run_command("git commit -m 'add railties dir'")
+      @commits << run_command("git rev-parse HEAD").strip
     end
   end
 
