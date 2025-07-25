@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rails-diff (0.5.0)
+    rails-diff (0.6.0)
       diffy (~> 3.4)
       rails (>= 7.0)
       thor (~> 1.0)
