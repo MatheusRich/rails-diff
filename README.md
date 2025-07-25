@@ -67,7 +67,14 @@ rails-diff generated scaffold Post --fail-on-diff
 rails-diff generated authentication --commit 7df1b8
 ```
 
-### Options
+### Compare dotfiles (configuration files)
+
+```bash
+# Compare configuration files like .gitignore, .rspec, .rubocop.yml
+rails-diff dotfiles
+```
+
+### Global Options
 
 #### --fail-on-diff
 

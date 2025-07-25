@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 - Add `--only` option to only include specific files or directories in the diff.
+- Add `rails-diff dotfiles` to compare dotfiles (configuration files) in the repository.
 - [BUGFIX] --fail-on-diff wasn't aborting with errors on diff.
 
 ## [0.5.0] - 2025-03-10
