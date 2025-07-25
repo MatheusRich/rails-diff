@@ -24,7 +24,8 @@ module Rails
         )
         return if diff.empty?
 
-        options[:fail] ? abort(diff) : puts(diff)
+        options[:fail_on_diff] ? abort(diff) : puts(diff)
+      end
       end
 
       desc "generated GENERATOR [args]", "Compare files that would be created by a Rails generator"
@@ -43,7 +44,7 @@ module Rails
         )
         return if diff.empty?
 
-        options[:fail] ? abort(diff) : puts(diff)
+        options[:fail_on_diff] ? abort(diff) : puts(diff)
       end
 
       map %w[--version -v] => :__version
