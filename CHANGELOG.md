@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [0.6.0] - 2025-07-25
+
 - Add `--only` option to only include specific files or directories in the diff.
 - Add `rails-diff dotfiles` to compare dotfiles (configuration files) in the repository.
 - [BUGFIX] --fail-on-diff wasn't aborting with errors on diff.
@@ -68,6 +70,9 @@ M## [0.1.1] - 2025-02-21
 
 - Initial release
 
+[0.6.0]: https://github.com/matheusrich/rails-diff/releases/tag/v0.6.0
+[0.5.0]: https://github.com/matheusrich/rails-diff/releases/tag/v0.5.0
+[0.4.1]: https://github.com/matheusrich/rails-diff/releases/tag/v0.4.1
 [0.4.1]: https://github.com/matheusrich/rails-diff/releases/tag/v0.4.1
 [0.4.0]: https://github.com/matheusrich/rails-diff/releases/tag/v0.4.0
 [0.3.0]: https://github.com/matheusrich/rails-diff/releases/tag/v0.3.0
