@@ -97,18 +97,18 @@ RSpec.describe Rails::Diff::RailsRepo do
   end
 
   describe "#install_dependencies" do
-    it "runs bundle check and bundle install if needed, and logs appropriately" do
+    it "runs bundle check and bundle install with --without db if needed, and logs appropriately" do
       @git_repo.clone_at_commit(@git_repo.commits[0], rails_path)
       repo = described_class.new(logger:, cache_dir:, rails_repo: @git_repo.remote_repo)
 
       # Simulate bundle check failing, so bundle install is needed
       allow(Rails::Diff).to receive(:system!).with("bundle check", abort: false, logger: logger).and_return(false)
-      allow(Rails::Diff).to receive(:system!).with("bundle install", logger: logger).and_return(true)
+      allow(Rails::Diff).to receive(:system!).with("bundle", "install", "--without", "db", logger: logger).and_return(true)
 
       repo.install_dependencies
 
       expect(logger).to have_received(:info).with("Installing Rails dependencies")
-      expect(Rails::Diff).to have_received(:system!).with("bundle install", logger: logger)
+      expect(Rails::Diff).to have_received(:system!).with("bundle", "install", "--without", "db", logger: logger)
     end
 
     it "does not run bundle install if bundle check passes" do
