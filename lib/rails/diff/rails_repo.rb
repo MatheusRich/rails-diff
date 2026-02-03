@@ -31,7 +31,8 @@ module Rails
         within "railties" do
           unless Rails::Diff.system!("bundle check", abort: false, logger: logger)
             logger.info "Installing Rails dependencies"
-            Rails::Diff.system!("bundle", "install", "--without", "db", logger: logger)
+            Rails::Diff.system!("bundle", "config", "set", "--local", "without", "db", logger: logger)
+            Rails::Diff.system!("bundle", "install", logger: logger)
           end
         end
       end
