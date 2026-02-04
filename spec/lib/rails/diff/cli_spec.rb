@@ -24,4 +24,32 @@ RSpec.describe Rails::Diff::CLI do
       end
     end
   end
+
+  describe "#infra" do
+    context "when --fail-on-diff is not specified" do
+      it "exits successfully" do
+        allow(Rails::Diff).to receive(:infra).with(kind_of(Hash)).and_return("diff output")
+
+        expect {
+          described_class.start(["infra"])
+        }.not_to raise_error
+      end
+    end
+
+    context "when --fail-on-diff is specified" do
+      it "exits with an error code" do
+        allow(Rails::Diff).to receive(:infra).with(kind_of(Hash)).and_return("diff output")
+
+        expect {
+          described_class.start(["infra", "--fail-on-diff"])
+        }.to raise_error(SystemExit)
+      end
+    end
+
+    it "passes skip and only options to Rails::Diff.infra" do
+      expect(Rails::Diff).to receive(:infra).with(hash_including(skip: ["config"], only: ["bin"])).and_return("")
+
+      described_class.start(["infra", "--skip", "config", "--only", "bin"])
+    end
+  end
 end

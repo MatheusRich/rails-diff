@@ -2,29 +2,20 @@
 
 module Rails
   module Diff
-    class FileTracker
-      def initialize(base_dir, skip = [], only = [])
-        @base_dir = base_dir
-        @skip = skip
-        @only = only
-      end
+    module FileTracker
+      DEFAULT_EXCLUSIONS = %w[.git tmp log test].freeze
 
-      def new_files
-        files_before = list_files(@base_dir)
+      def self.new_files(base_dir, only:, skip: [])
+        files_before = list_files(base_dir)
         yield
-        files_after = list_files(@base_dir, @skip, @only)
+        files_after = list_files(base_dir, skip:, only:)
         files_after - files_before
       end
 
-      private
-
-      def list_files(dir, skip = [], only = [])
+      def self.list_files(dir, skip: [], only: [], exclusions: DEFAULT_EXCLUSIONS)
         files = Dir.glob("#{dir}/**/*", File::FNM_DOTMATCH).reject do |it|
           File.directory?(it) ||
-            it.start_with?("#{dir}/.git") ||
-            it.start_with?("#{dir}/tmp") ||
-            it.start_with?("#{dir}/log") ||
-            it.start_with?("#{dir}/test") ||
+            exclusions.any? { |e| it.start_with?("#{dir}/#{e}") } ||
             skip.any? { |s| it.start_with?("#{dir}/#{s}") }
         end
 
