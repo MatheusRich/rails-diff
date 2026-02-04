@@ -102,15 +102,15 @@ RSpec.describe Rails::Diff::RailsRepo do
       repo = described_class.new(logger:, cache_dir:, rails_repo: @git_repo.remote_repo)
 
       # Simulate bundle check failing, so bundle install is needed
-      allow(Rails::Diff).to receive(:system!).with("bundle check", abort: false, logger: logger).and_return(false)
-      allow(Rails::Diff).to receive(:system!).with("bundle", "config", "set", "--local", "without", "db", logger: logger).and_return(true)
-      allow(Rails::Diff).to receive(:system!).with("bundle", "install", logger: logger).and_return(true)
+      allow(Rails::Diff::Shell).to receive(:run!).with("bundle check", abort: false, logger:).and_return(false)
+      allow(Rails::Diff::Shell).to receive(:run!).with("bundle", "config", "set", "--local", "without", "db", logger:).and_return(true)
+      allow(Rails::Diff::Shell).to receive(:run!).with("bundle", "install", logger:).and_return(true)
 
       repo.install_dependencies
 
       expect(logger).to have_received(:info).with("Installing Rails dependencies")
-      expect(Rails::Diff).to have_received(:system!).with("bundle", "config", "set", "--local", "without", "db", logger: logger)
-      expect(Rails::Diff).to have_received(:system!).with("bundle", "install", logger: logger)
+      expect(Rails::Diff::Shell).to have_received(:run!).with("bundle", "config", "set", "--local", "without", "db", logger:)
+      expect(Rails::Diff::Shell).to have_received(:run!).with("bundle", "install", logger:)
     end
 
     it "does not run bundle install if bundle check passes" do
@@ -118,7 +118,7 @@ RSpec.describe Rails::Diff::RailsRepo do
       repo = described_class.new(logger:, cache_dir:, rails_repo: @git_repo.remote_repo)
 
       # Simulate bundle check passing
-      allow(Rails::Diff).to receive(:system!).with("bundle check", abort: false, logger: logger).and_return(true)
+      allow(Rails::Diff::Shell).to receive(:run!).with("bundle check", abort: false, logger:).and_return(true)
 
       repo.install_dependencies
 
@@ -131,7 +131,7 @@ RSpec.describe Rails::Diff::RailsRepo do
       @git_repo.clone_at_commit(@git_repo.commits.last, rails_path)
       repo = described_class.new(logger:, cache_dir:, rails_repo: @git_repo.remote_repo)
 
-      allow(Rails::Diff).to receive(:system!).and_return(true)
+      allow(Rails::Diff::Shell).to receive(:run!).and_return(true)
       app_name = "myapp"
       options = ["--skip-test"]
 
@@ -141,7 +141,7 @@ RSpec.describe Rails::Diff::RailsRepo do
         "bundle", "exec", "rails", "new", app_name,
         "--main", "--skip-bundle", "--force", "--quiet", *options
       ]
-      expect(Rails::Diff).to have_received(:system!).with(*expected_command, logger: logger)
+      expect(Rails::Diff::Shell).to have_received(:run!).with(*expected_command, logger:)
       expect(logger).to have_received(:info).with(/Generating new Rails application/)
     end
   end

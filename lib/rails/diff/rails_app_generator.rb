@@ -32,20 +32,20 @@ module Rails
 
       def install_app_dependencies
         Dir.chdir(template_app_path) do
-          unless Rails::Diff.system!("bundle check", abort: false, logger: logger)
+          unless Shell.run!("bundle check", abort: false, logger:)
             logger.info "Installing application dependencies"
-            Rails::Diff.system!("bundle install", logger: logger)
+            Shell.run!("bundle install", logger:)
           end
         end
       end
 
       def run_generator(generator_name, *args, skip, only)
         Dir.chdir(template_app_path) do
-          Rails::Diff.system!("bin/rails", "destroy", generator_name, *args, logger: logger)
+          Shell.run!("bin/rails", "destroy", generator_name, *args, logger:)
           logger.info "Running generator: rails generate #{generator_name} #{args.join(" ")}"
 
           FileTracker.new(template_app_path, skip, only)
-            .new_files { Rails::Diff.system!("bin/rails", "generate", generator_name, *args, logger: logger) }
+            .new_files { Shell.run!("bin/rails", "generate", generator_name, *args, logger:) }
             .map { |it| it.delete_prefix("#{template_app_path}/") }
         end
       end

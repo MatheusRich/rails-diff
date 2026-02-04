@@ -12,13 +12,13 @@ module Rails
       def checkout(commit)
         on_rails_dir do
           logger.info "Checking out Rails (at commit #{commit[0..6]})"
-          Rails::Diff.system!("git", "checkout", commit, logger: logger)
+          Shell.run!("git", "checkout", commit, logger:)
         end
       end
 
       def latest_commit
         @latest_commit ||= on_rails_dir do
-          Rails::Diff.system!("git fetch origin main", logger: logger)
+          Shell.run!("git fetch origin main", logger:)
           `git rev-parse origin/main`.strip
         end
       end
@@ -29,10 +29,10 @@ module Rails
 
       def install_dependencies
         within "railties" do
-          unless Rails::Diff.system!("bundle check", abort: false, logger: logger)
+          unless Shell.run!("bundle check", abort: false, logger:)
             logger.info "Installing Rails dependencies"
-            Rails::Diff.system!("bundle", "config", "set", "--local", "without", "db", logger: logger)
-            Rails::Diff.system!("bundle", "install", logger: logger)
+            Shell.run!("bundle", "config", "set", "--local", "without", "db", logger:)
+            Shell.run!("bundle", "install", logger:)
           end
         end
       end
@@ -41,7 +41,7 @@ module Rails
         within "railties" do
           command = rails_new_command(name, options)
           logger.info "Generating new Rails application\n\t  > #{command.join(" ")}"
-          Rails::Diff.system!(*command, logger: logger)
+          Shell.run!(*command, logger:)
         end
       end
 
@@ -75,7 +75,7 @@ module Rails
 
       def clone_repo
         logger.info "Cloning Rails repository"
-        Rails::Diff.system!("git", "clone", "--depth", "1", rails_repo, rails_path, logger: logger)
+        Shell.run!("git", "clone", "--depth", "1", rails_repo, rails_path, logger:)
       end
 
       def rails_new_command(name, options)

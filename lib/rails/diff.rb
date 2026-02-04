@@ -3,10 +3,10 @@
 require "rails"
 require "diffy"
 require "fileutils"
-require "open3"
 require_relative "diff/cli"
 require_relative "diff/file_tracker"
 require_relative "diff/logger"
+require_relative "diff/shell"
 require_relative "diff/rails_app_generator"
 require_relative "diff/rails_repo"
 require_relative "diff/version"
@@ -33,19 +33,6 @@ module Rails
         app_generator.run_generator(generator_name, *args, skip, only)
           .map { |it| diff_with_header(it, app_generator.template_app_path) }
           .join("\n\n")
-      end
-
-      def system!(*cmd, logger:, abort: true)
-        _, stderr, status = Open3.capture3(*cmd)
-        logger.debug(cmd.join(" "))
-        if status.success?
-          true
-        elsif abort
-          logger.error("Command failed:", cmd.join(" "))
-          abort stderr
-        else
-          false
-        end
       end
 
       private
