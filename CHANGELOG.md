@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Replace `diffy` with `difftastic` for better diff output with syntax highlighting.
+
 ## [0.6.0] - 2025-07-25
 
 - Add `--only` option to only include specific files or directories in the diff.

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "rails"
-require "diffy"
+require "difftastic"
 require "fileutils"
 require_relative "diff/cli"
 require_relative "diff/file_tracker"
@@ -52,12 +52,13 @@ module Rails
         return "File not found in the Rails template" unless File.exist?(rails_file)
         return "File not found in your repository" unless File.exist?(repo_file)
 
-        Diffy::Diff.new(
-          rails_file,
-          repo_file,
-          context: 2,
-          source: "files"
-        ).to_s(:color).chomp
+        differ = Difftastic::Differ.new(
+          color: :always,
+          left_label: "Rails File (#{file})",
+          right_label: "Repo File (#{file})"
+        )
+
+        differ.diff_files(rails_file, repo_file).chomp
       end
     end
   end
