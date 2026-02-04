@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     rails-diff (0.6.1)
-      diffy (~> 3.4)
+      difftastic (~> 0.8)
       rails (>= 7.0)
       thor (~> 1.0)
 
@@ -90,7 +90,12 @@ GEM
     crass (1.0.6)
     date (3.4.1)
     diff-lcs (1.5.1)
-    diffy (3.4.3)
+    difftastic (0.8.0)
+      pretty_please
+    difftastic (0.8.0-x86_64-darwin)
+      pretty_please
+    dispersion (0.2.0)
+      prism
     docile (1.4.1)
     drb (2.2.3)
     erubi (1.13.1)
@@ -140,6 +145,8 @@ GEM
       racc
     pp (0.6.2)
       prettyprint
+    pretty_please (0.2.0)
+      dispersion (~> 0.2)
     prettyprint (0.2.0)
     prism (1.4.0)
     psych (5.2.3)
