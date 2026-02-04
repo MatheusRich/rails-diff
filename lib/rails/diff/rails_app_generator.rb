@@ -44,8 +44,8 @@ module Rails
           Shell.run!("bin/rails", "destroy", generator_name, *args, logger:)
           logger.info "Running generator: rails generate #{generator_name} #{args.join(" ")}"
 
-          FileTracker.new(template_app_path, skip, only)
-            .new_files { Shell.run!("bin/rails", "generate", generator_name, *args, logger:) }
+          FileTracker
+            .new_files(template_app_path, skip:, only:) { Shell.run!("bin/rails", "generate", generator_name, *args, logger:) }
             .map { |it| it.delete_prefix("#{template_app_path}/") }
         end
       end

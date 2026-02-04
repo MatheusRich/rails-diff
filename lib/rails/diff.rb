@@ -31,7 +31,20 @@ module Rails
         app_generator.install_app_dependencies
 
         app_generator.run_generator(generator_name, *args, skip, only)
-          .map { |it| diff_with_header(it, app_generator.template_app_path) }
+          .filter_map { |it| diff_with_header(it, app_generator.template_app_path) }
+          .join("\n\n")
+      end
+
+      def infra(no_cache: false, skip: [], only: [], commit: nil, new_app_options: nil)
+        app_generator = RailsAppGenerator.new(commit:, new_app_options:, no_cache:)
+        app_generator.create_template_app
+
+        default_skip = %w[app lib]
+        effective_skip = (default_skip + skip).uniq
+
+        FileTracker.list_files(app_generator.template_app_path, skip: effective_skip, only:)
+          .map { |f| f.delete_prefix("#{app_generator.template_app_path}/") }
+          .filter_map { |it| diff_with_header(it, app_generator.template_app_path) }
           .join("\n\n")
       end
 

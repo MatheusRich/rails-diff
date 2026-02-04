@@ -74,7 +74,27 @@ rails-diff generated authentication --commit 7df1b8
 rails-diff dotfiles
 ```
 
+### Compare infrastructure files
+
+Compare all Rails-generated infrastructure files at once. This includes everything except `app/` and `lib/` (your application code): `bin/`, `config/`, `db/`, `public/`, `Dockerfile`, `Gemfile`, `Rakefile`, dotfiles, and more.
+
+```bash
+# Compare all infrastructure files
+rails-diff infra
+
+# Compare only specific directories
+rails-diff infra --only bin config
+
+# Skip additional directories
+rails-diff infra --skip db
+
+# Fail if there are differences (useful for CI)
+rails-diff infra --fail-on-diff
+```
+
 ### Global Options
+
+These options can be used with any of the commands above.
 
 #### --fail-on-diff
 
