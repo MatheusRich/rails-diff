@@ -16,8 +16,8 @@ module Rails
     CACHE_DIR = File.expand_path("#{ENV["HOME"]}/.rails-diff/cache")
 
     class << self
-      def file(*files, no_cache: false, commit: nil, new_app_options: nil)
-        app_generator = RailsAppGenerator.new(commit:, new_app_options:, no_cache:)
+      def file(*files, no_cache: false, ref: nil, new_app_options: nil)
+        app_generator = RailsAppGenerator.new(ref:, new_app_options:, no_cache:)
         app_generator.create_template_app
 
         files
@@ -25,8 +25,8 @@ module Rails
           .join("\n")
       end
 
-      def generated(generator_name, *args, no_cache: false, skip: [], only: [], commit: nil, new_app_options: nil)
-        app_generator = RailsAppGenerator.new(commit:, new_app_options:, no_cache:)
+      def generated(generator_name, *args, no_cache: false, skip: [], only: [], ref: nil, new_app_options: nil)
+        app_generator = RailsAppGenerator.new(ref:, new_app_options:, no_cache:)
         app_generator.create_template_app
         app_generator.install_app_dependencies
 
@@ -35,8 +35,8 @@ module Rails
           .join("\n\n")
       end
 
-      def infra(no_cache: false, skip: [], only: [], commit: nil, new_app_options: nil)
-        app_generator = RailsAppGenerator.new(commit:, new_app_options:, no_cache:)
+      def infra(no_cache: false, skip: [], only: [], ref: nil, new_app_options: nil)
+        app_generator = RailsAppGenerator.new(ref:, new_app_options:, no_cache:)
         app_generator.create_template_app
 
         default_skip = %w[app lib]

@@ -5,7 +5,7 @@ module Rails
     class CLI < Thor
       class_option :no_cache, type: :boolean, desc: "Clear cache before running", aliases: ["--clear-cache"]
       class_option :fail_on_diff, type: :boolean, desc: "Fail if there are differences"
-      class_option :commit, type: :string, desc: "Compare against a specific commit"
+      class_option :ref, type: :string, desc: "Compare against a specific ref (tag, branch, or commit SHA)", aliases: ["--commit"]
       class_option :new_app_options, type: :string, desc: "Options to pass to the rails new command"
       class_option :debug, type: :boolean, desc: "Print debug information", aliases: ["-d"]
 
@@ -19,7 +19,7 @@ module Rails
         diff = Rails::Diff.file(
           *files,
           no_cache: options[:no_cache],
-          commit: options[:commit],
+          ref: options[:ref],
           new_app_options: options[:new_app_options]
         )
         return if diff.empty?
@@ -45,7 +45,7 @@ module Rails
           no_cache: options[:no_cache],
           skip: options[:skip],
           only: options[:only],
-          commit: options[:commit],
+          ref: options[:ref],
           new_app_options: options[:new_app_options]
         )
         return if diff.empty?
@@ -62,7 +62,7 @@ module Rails
           no_cache: options[:no_cache],
           skip: options[:skip],
           only: options[:only],
-          commit: options[:commit],
+          ref: options[:ref],
           new_app_options: options[:new_app_options]
         )
         return if diff.empty?

@@ -41,8 +41,8 @@ rails-diff file Dockerfile --clear-cache
 # Fail if there are differences (useful for CI)
 rails-diff file Dockerfile --fail-on-diff
 
-# Compare a specific commit
-rails-diff file Dockerfile --commit 7df1b8
+# Compare a specific ref (tag, branch, or commit SHA)
+rails-diff file Dockerfile --ref v8.0.0
 ```
 
 ### Compare generator files
@@ -63,8 +63,8 @@ rails-diff generated scaffold Post --skip app/views app/helpers
 # Fail if there are differences (useful for CI)
 rails-diff generated scaffold Post --fail-on-diff
 
-# Compare a specific commit
-rails-diff generated authentication --commit 7df1b8
+# Compare a specific ref (tag, branch, or commit SHA)
+rails-diff generated authentication --ref v8.0.0
 ```
 
 ### Compare dotfiles (configuration files)
@@ -100,10 +100,10 @@ These options can be used with any of the commands above.
 
 If this option is specified, the command will exit with a non-zero status code if there are any differences between your files and the generated ones. This can be particularly useful when using the gem in Continuous Integration (CI) environments.
 
-#### --commit <commit_hash>
+#### --ref <ref>
 
-Specify the commit hash you want to compare against. If not provided, the latest
-commit on main will be used by default.
+Specify a tag, branch, or commit SHA to compare against. If not provided, the
+latest commit on main will be used by default. `--commit` is kept as an alias.
 
 #### --new-app-options <options>
 
@@ -168,7 +168,7 @@ The gem caches the generated Rails application to avoid regenerating it on every
 - The cache directory doesn't exist (or is cleared with the `--clear-cache` option)
 - You use `--new-app-options` with different options
 - You change your `~/.railsrc` file
-- You use `--commit` with a different commit
+- You use `--ref` with a different ref
 
 You can also force clear the cache by using the `--no-cache` option (or its alias `--clear-cache`) with any command.
 

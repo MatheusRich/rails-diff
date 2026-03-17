@@ -5,10 +5,10 @@ module Rails
     class RailsAppGenerator
       RAILSRC_PATH = "#{ENV["HOME"]}/.railsrc"
 
-      def initialize(commit: nil, new_app_options: nil, no_cache: false, logger: Logger, cache_dir: Rails::Diff::CACHE_DIR)
+      def initialize(ref: nil, new_app_options: nil, no_cache: false, logger: Logger, cache_dir: Rails::Diff::CACHE_DIR)
         @new_app_options = new_app_options.to_s.split
         @rails_repo = RailsRepo.new(logger:, cache_dir:)
-        @commit = commit
+        @ref = ref
         @logger = logger
         @cache_dir = cache_dir
         clear_cache if no_cache
@@ -54,9 +54,9 @@ module Rails
 
       attr_reader :new_app_options, :rails_repo, :logger, :cache_dir
 
-      def commit = @commit ||= rails_repo.latest_commit
+      def ref = @ref ||= rails_repo.latest_commit
 
-      def rails_cache_dir_key = "rails-#{commit.first(10)}"
+      def rails_cache_dir_key = "rails-#{ref.first(10)}"
 
       def railsrc_options
         @railsrc_options ||= File.exist?(RAILSRC_PATH) ? File.readlines(RAILSRC_PATH) : []
@@ -69,7 +69,7 @@ module Rails
       end
 
       def create_new_rails_app
-        checkout_rails_commit
+        checkout_rails_ref
         generate_app
       end
 
@@ -81,7 +81,7 @@ module Rails
         rails_repo.new_app(template_app_path, rails_new_options)
       end
 
-      def checkout_rails_commit = rails_repo.checkout(commit)
+      def checkout_rails_ref = rails_repo.checkout(ref)
 
       def rails_new_options
         @rails_new_options ||= (new_app_options + railsrc_options).compact

@@ -85,6 +85,19 @@ RSpec.describe Rails::Diff::RailsRepo do
       expect(current).to eq @git_repo.commits[1]
     end
 
+    it "checks out a tag in a shallow clone" do
+      tagged_commit = @git_repo.commits.last
+      @git_repo.add_tag("v1.0.0")
+      @git_repo.add_commit("after tag")
+      @git_repo.shallow_clone(rails_path)
+      repo = described_class.new(logger:, cache_dir:, rails_repo: @git_repo.remote_repo)
+
+      repo.checkout("v1.0.0")
+
+      current = Dir.chdir(rails_path) { `git rev-parse HEAD`.strip }
+      expect(current).to eq tagged_commit
+    end
+
     it "logs the checkout info message" do
       @git_repo.clone_at_commit(@git_repo.commits.last, rails_path)
       repo = described_class.new(logger:, cache_dir:, rails_repo: @git_repo.remote_repo)
@@ -92,7 +105,7 @@ RSpec.describe Rails::Diff::RailsRepo do
       repo.checkout(@git_repo.commits[1])
 
       expect(logger).to have_received(:info)
-        .with(/Checking out Rails \(at commit #{@git_repo.commits[1][0..6]}\)/)
+        .with(/Checking out Rails \(at #{@git_repo.commits[1]}\)/)
     end
   end
 

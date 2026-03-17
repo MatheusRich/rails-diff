@@ -9,10 +9,13 @@ module Rails
         @rails_repo = rails_repo
       end
 
-      def checkout(commit)
+      def checkout(ref)
         on_rails_dir do
-          logger.info "Checking out Rails (at commit #{commit[0..6]})"
-          Shell.run!("git", "checkout", commit, logger:)
+          logger.info "Checking out Rails (at #{ref})"
+          unless Shell.run!("git", "checkout", ref, abort: false, logger:)
+            Shell.run!("git", "fetch", "--depth", "1", "origin", ref, logger:)
+            Shell.run!("git", "checkout", "FETCH_HEAD", logger:)
+          end
         end
       end
 

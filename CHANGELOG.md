@@ -1,6 +1,8 @@
 ## [Unreleased]
 
 - Replace `diffy` with `difftastic` for better diff output with syntax highlighting.
+- Add `--ref` option to compare against a specific tag, branch, or commit SHA (`--commit` is kept as an alias).
+- [BUGFIX] `--commit` (now `--ref`) failed with shallow clones when the ref wasn't locally available.
 
 ## [0.6.0] - 2025-07-25
 

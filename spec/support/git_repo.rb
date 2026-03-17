@@ -41,6 +41,17 @@ class GitRepo
     @commits.last
   end
 
+  def add_tag(tag_name)
+    Dir.chdir(@work_dir) do
+      `git tag #{tag_name} > /dev/null 2>&1`
+      `git push origin #{tag_name} > /dev/null 2>&1`
+    end
+  end
+
+  def shallow_clone(dest_path)
+    `git clone --depth 1 file://#{@remote_repo} #{dest_path} > /dev/null 2>&1`
+  end
+
   def clone_at_commit(commit_sha, dest_path)
     `git clone #{@remote_repo} #{dest_path} > /dev/null 2>&1`
     Dir.chdir(dest_path) do
