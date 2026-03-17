@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [0.7.0] - 2026-03-17
+
 - Replace `diffy` with `difftastic` for better diff output with syntax highlighting.
 - Add `--ref` option to compare against a specific tag, branch, or commit SHA (`--commit` is kept as an alias).
 - [BUGFIX] `--commit` (now `--ref`) failed with shallow clones when the ref wasn't locally available.
@@ -74,6 +76,7 @@ M## [0.1.1] - 2025-02-21
 
 - Initial release
 
+[0.7.0]: https://github.com/matheusrich/rails-diff/releases/tag/v0.7.0
 [0.6.0]: https://github.com/matheusrich/rails-diff/releases/tag/v0.6.0
 [0.5.0]: https://github.com/matheusrich/rails-diff/releases/tag/v0.5.0
 [0.4.1]: https://github.com/matheusrich/rails-diff/releases/tag/v0.4.1
