@@ -3,8 +3,6 @@ require "digest"
 module Rails
   module Diff
     class RailsAppGenerator
-      RAILSRC_PATH = "#{ENV["HOME"]}/.railsrc"
-
       def initialize(ref: nil, new_app_options: nil, no_cache: false, logger: Logger, cache_dir: Rails::Diff::CACHE_DIR, rails_repo: RailsRepo.new(logger:, cache_dir:))
         @new_app_options = new_app_options.to_s.split
         @rails_repo = rails_repo
@@ -58,8 +56,10 @@ module Rails
 
       def rails_cache_dir_key = "rails-#{ref.first(10)}"
 
+      def railsrc_path = "#{ENV["HOME"]}/.railsrc"
+
       def railsrc_options
-        @railsrc_options ||= File.exist?(RAILSRC_PATH) ? File.readlines(RAILSRC_PATH) : []
+        @railsrc_options ||= File.exist?(railsrc_path) ? File.readlines(railsrc_path) : []
       end
 
       def app_name = @app_name ||= File.basename(Dir.pwd)
@@ -76,7 +76,7 @@ module Rails
       def generate_app
         rails_repo.install_dependencies
         if railsrc_options.any?
-          logger.info "Using default options from #{RAILSRC_PATH}:\n\t  > #{railsrc_options.join(" ")}"
+          logger.info "Using default options from #{railsrc_path}:\n\t  > #{railsrc_options.join(" ")}"
         end
         rails_repo.new_app(template_app_path, rails_new_options)
       end
