@@ -5,9 +5,9 @@ module Rails
     class RailsAppGenerator
       RAILSRC_PATH = "#{ENV["HOME"]}/.railsrc"
 
-      def initialize(ref: nil, new_app_options: nil, no_cache: false, logger: Logger, cache_dir: Rails::Diff::CACHE_DIR)
+      def initialize(ref: nil, new_app_options: nil, no_cache: false, logger: Logger, cache_dir: Rails::Diff::CACHE_DIR, rails_repo: RailsRepo.new(logger:, cache_dir:))
         @new_app_options = new_app_options.to_s.split
-        @rails_repo = RailsRepo.new(logger:, cache_dir:)
+        @rails_repo = rails_repo
         @ref = ref
         @logger = logger
         @cache_dir = cache_dir
