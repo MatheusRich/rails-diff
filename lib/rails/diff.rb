@@ -16,27 +16,24 @@ module Rails
     CACHE_DIR = File.expand_path("#{ENV["HOME"]}/.rails-diff/cache")
 
     class << self
-      def file(*files, no_cache: false, ref: nil, new_app_options: nil)
-        app_generator = RailsAppGenerator.new(ref:, new_app_options:, no_cache:)
+      def file(*files, no_cache: false, ref: nil, new_app_options: nil, app_generator: RailsAppGenerator.new(ref:, new_app_options:, no_cache:), differ_class: Difftastic::Differ)
         app_generator.create_template_app
 
         files
-          .filter_map { |it| diff_with_header(it, app_generator.template_app_path) }
+          .filter_map { |it| diff_with_header(it, app_generator.template_app_path, differ_class:) }
           .join("\n")
       end
 
-      def generated(generator_name, *args, no_cache: false, skip: [], only: [], ref: nil, new_app_options: nil)
-        app_generator = RailsAppGenerator.new(ref:, new_app_options:, no_cache:)
+      def generated(generator_name, *args, no_cache: false, skip: [], only: [], ref: nil, new_app_options: nil, app_generator: RailsAppGenerator.new(ref:, new_app_options:, no_cache:), differ_class: Difftastic::Differ)
         app_generator.create_template_app
         app_generator.install_app_dependencies
 
         app_generator.run_generator(generator_name, *args, skip, only)
-          .filter_map { |it| diff_with_header(it, app_generator.template_app_path) }
+          .filter_map { |it| diff_with_header(it, app_generator.template_app_path, differ_class:) }
           .join("\n\n")
       end
 
-      def infra(no_cache: false, skip: [], only: [], ref: nil, new_app_options: nil)
-        app_generator = RailsAppGenerator.new(ref:, new_app_options:, no_cache:)
+      def infra(no_cache: false, skip: [], only: [], ref: nil, new_app_options: nil, app_generator: RailsAppGenerator.new(ref:, new_app_options:, no_cache:), differ_class: Difftastic::Differ)
         app_generator.create_template_app
 
         default_skip = %w[app lib]
@@ -44,28 +41,28 @@ module Rails
 
         FileTracker.list_files(app_generator.template_app_path, skip: effective_skip, only:)
           .map { |f| f.delete_prefix("#{app_generator.template_app_path}/") }
-          .filter_map { |it| diff_with_header(it, app_generator.template_app_path) }
+          .filter_map { |it| diff_with_header(it, app_generator.template_app_path, differ_class:) }
           .join("\n\n")
       end
 
       private
 
-      def diff_with_header(file, template_app_path)
-        diff = diff_file(file, template_app_path)
+      def diff_with_header(file, template_app_path, differ_class:)
+        diff = diff_file(file, template_app_path, differ_class:)
         return if diff.empty?
 
         header = "#{file} diff:"
         [header, "=" * header.size, diff].join("\n")
       end
 
-      def diff_file(file, template_app_path)
+      def diff_file(file, template_app_path, differ_class:)
         rails_file = File.join(template_app_path, file)
         repo_file = File.join(Dir.pwd, file)
 
         return "File not found in the Rails template" unless File.exist?(rails_file)
         return "File not found in your repository" unless File.exist?(repo_file)
 
-        differ = Difftastic::Differ.new(
+        differ = differ_class.new(
           color: :always,
           left_label: "Rails File (#{file})",
           right_label: "Repo File (#{file})"
