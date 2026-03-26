@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [0.8.0] - 2026-03-26
+
 - `--ref` now accepts `rails --version` output (e.g., `--ref "Rails 7.2.3"` is converted to `v7.2.3`).
 
 ## [0.7.0] - 2026-03-17
@@ -78,6 +80,7 @@ M## [0.1.1] - 2025-02-21
 
 - Initial release
 
+[0.8.0]: https://github.com/matheusrich/rails-diff/releases/tag/v0.8.0
 [0.7.0]: https://github.com/matheusrich/rails-diff/releases/tag/v0.7.0
 [0.6.0]: https://github.com/matheusrich/rails-diff/releases/tag/v0.6.0
 [0.5.0]: https://github.com/matheusrich/rails-diff/releases/tag/v0.5.0
