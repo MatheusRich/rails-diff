@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- `--ref` now accepts `rails --version` output (e.g., `--ref "Rails 7.2.3"` is converted to `v7.2.3`).
+
 ## [0.7.0] - 2026-03-17
 
 - Replace `diffy` with `difftastic` for better diff output with syntax highlighting.

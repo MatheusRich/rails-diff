@@ -64,6 +64,23 @@ RSpec.describe Rails::Diff do
       expect(result).to eq("")
     end
 
+    it "normalizes 'Rails X.Y.Z' ref format before checking out" do
+      repo = spy(latest_commit: "v7.2.3", up_to_date?: false)
+      generator = Rails::Diff::RailsAppGenerator.new(
+        ref: "Rails 7.2.3",
+        logger: spy,
+        cache_dir: template_dir,
+        rails_repo: repo
+      )
+
+      write_file(template_dir, "Gemfile", "gem 'rails'\n")
+      write_file(repo_dir, "Gemfile", "gem 'rails'\n")
+
+      described_class.file("Gemfile", app_generator: generator, differ_class: fake_differ_class(output: ""))
+
+      expect(repo).to have_received(:checkout).with("v7.2.3")
+    end
+
     it "calls create_template_app on the generator" do
       generator = mock_generator
       write_file(template_dir, "Gemfile", "gem 'rails'\n")

@@ -6,7 +6,7 @@ module Rails
       def initialize(ref: nil, new_app_options: nil, no_cache: false, logger: Logger, cache_dir: Rails::Diff::CACHE_DIR, rails_repo: RailsRepo.new(logger:, cache_dir:))
         @new_app_options = new_app_options.to_s.split
         @rails_repo = rails_repo
-        @ref = ref
+        @ref = normalize_ref(ref)
         @logger = logger
         @cache_dir = cache_dir
         clear_cache if no_cache
@@ -51,6 +51,14 @@ module Rails
       private
 
       attr_reader :new_app_options, :rails_repo, :logger, :cache_dir
+
+      def normalize_ref(ref)
+        if ref&.start_with?("Rails ")
+          "v#{ref.delete_prefix("Rails ")}"
+        else
+          ref
+        end
+      end
 
       def ref = @ref ||= rails_repo.latest_commit
 

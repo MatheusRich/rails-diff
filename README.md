@@ -105,6 +105,12 @@ If this option is specified, the command will exit with a non-zero status code i
 Specify a tag, branch, or commit SHA to compare against. If not provided, the
 latest commit on main will be used by default. `--commit` is kept as an alias.
 
+You can also pass `rails --version` output directly:
+
+```bash
+rails-diff file Dockerfile --ref "$(rails --version)"
+```
+
 > [!NOTE]
 > When using a commit SHA, the full 40-character SHA is required (short SHAs are not supported).
 

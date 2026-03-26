@@ -95,6 +95,26 @@ RSpec.describe Rails::Diff::RailsAppGenerator do
     end
   end
 
+  describe "ref normalization" do
+    it "converts 'Rails X.Y.Z' format to 'vX.Y.Z'" do
+      repo = spy(latest_commit: "v7.2.3", up_to_date?: false)
+      generator = build_generator(ref: "Rails 7.2.3", rails_repo: repo)
+
+      generator.create_template_app
+
+      expect(repo).to have_received(:checkout).with("v7.2.3")
+    end
+
+    it "passes through refs that don't start with 'Rails '" do
+      repo = spy(latest_commit: "abc1234567890def", up_to_date?: false)
+      generator = build_generator(ref: "v7.2.3", rails_repo: repo)
+
+      generator.create_template_app
+
+      expect(repo).to have_received(:checkout).with("v7.2.3")
+    end
+  end
+
   describe "#clear_cache" do
     it "removes and recreates the cache directory" do
       generator = build_generator
