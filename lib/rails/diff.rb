@@ -13,9 +13,14 @@ require_relative "diff/version"
 
 module Rails
   module Diff
-    CACHE_DIR = File.expand_path("#{ENV["HOME"]}/.rails-diff/cache")
-
     class << self
+      def cache_dir
+        xdg = ENV["XDG_CACHE_HOME"]
+        base = (xdg && File.absolute_path?(xdg)) ? xdg : File.join(Dir.home, ".cache")
+
+        File.join(base, "rails-diff")
+      end
+
       def file(*files, no_cache: false, ref: nil, new_app_options: nil, app_generator: RailsAppGenerator.new(ref:, new_app_options:, no_cache:), differ_class: Difftastic::Differ)
         app_generator.create_template_app
 
@@ -71,5 +76,7 @@ module Rails
         differ.diff_files(rails_file, repo_file).chomp
       end
     end
+
+    CACHE_DIR = cache_dir
   end
 end

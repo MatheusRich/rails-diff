@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Respect the XDG Base Directory spec for the cache location. Cache now lives at `$XDG_CACHE_HOME/rails-diff` (defaulting to `~/.cache/rails-diff`) instead of `~/.rails-diff/cache`. The old cache directory is no longer used and can be removed (PR #37).
+
 ## [0.8.0] - 2026-03-26
 
 - `--ref` now accepts `rails --version` output (e.g., `--ref "Rails 7.2.3"` is converted to `v7.2.3`).
