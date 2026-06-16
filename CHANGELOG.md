@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [0.8.1] - 2026-06-16
+
 - Respect the XDG Base Directory spec for the cache location. Cache now lives at `$XDG_CACHE_HOME/rails-diff` (defaulting to `~/.cache/rails-diff`) instead of `~/.rails-diff/cache`. The old cache directory is no longer used and can be removed (PR #37).
 
 ## [0.8.0] - 2026-03-26
@@ -82,6 +84,7 @@ M## [0.1.1] - 2025-02-21
 
 - Initial release
 
+[0.8.1]: https://github.com/matheusrich/rails-diff/releases/tag/v0.8.1
 [0.8.0]: https://github.com/matheusrich/rails-diff/releases/tag/v0.8.0
 [0.7.0]: https://github.com/matheusrich/rails-diff/releases/tag/v0.7.0
 [0.6.0]: https://github.com/matheusrich/rails-diff/releases/tag/v0.6.0
